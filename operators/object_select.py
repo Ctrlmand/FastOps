@@ -97,6 +97,7 @@ class F_OT_SelectObjectByMaterial(bpy.types.Operator):
     def execute(self, context: Context ):
         obj_data = bpy.data.objects
         count=0
+        last_obj=None
 
         bpy.ops.object.select_all(action='DESELECT')
         for obj in obj_data:
@@ -106,7 +107,9 @@ class F_OT_SelectObjectByMaterial(bpy.types.Operator):
             else:
                 obj.select_set(True)
                 count+=1
+                last_obj=obj
                 ...
+        context.view_layer.objects.active = last_obj
         if count >0:
             self.report({'INFO'}, f"{count} Selected")
         else:

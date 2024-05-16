@@ -18,6 +18,6 @@ for mod in submod:
 
 # Register Functin
 def register():
-    utility.register_list.register("OT", _modcls)
+    utility.register_list.Register("OT", _modcls)
 def unregister():
-    utility.register_list.unregister("OT", _modcls)
+    utility.register_list.Unregister("OT", _modcls)

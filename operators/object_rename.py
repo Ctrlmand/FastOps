@@ -3,17 +3,14 @@ import bpy
 import re
 from bpy.types import Context
 
-#rename
-bpy.types.Scene.FastOpsObjectBatchRename_namePrefix = bpy.props.StringProperty(name= "FastOpsRename NamePrefix", default="")
-bpy.types.Scene.FastOpsObjectBatchRename_suffixNumber = bpy.props.IntProperty(name= "FastOpsRename SuffixNumber", default=3)
-bpy.types.Scene.FastOpsObjectBatchRename_suffixStart = bpy.props.IntProperty(name= "FastOpsRename SuffixStart", default=0)
-#add suffix
-bpy.types.Scene.FastOpsObjectBatchRename_isOnlyAddSuffix = bpy.props.BoolProperty(name= "FastOpsRename IsOnlyAddSuffix",default=False)
-bpy.types.Scene.FastOpsObjectBatchRename_addSuffix = bpy.props.StringProperty(name= "FastOpsRename SetSuffix", default="")
-#find and replace
-bpy.types.Scene.FastOpsObjectBatchRename_find = bpy.props.StringProperty(name= "FastOpsRename Find", default= "")
-bpy.types.Scene.FastOpsObjectBatchRename_replace = bpy.props.StringProperty(name= "FastOpsRename Replace", default= "")
-
+# F_OT_ObjectBatchRename
+## rename
+bpy.types.Scene.F_ObjectBatchRename_namePrefix = bpy.props.StringProperty(name= "FastOpsRename NamePrefix", default="")
+bpy.types.Scene.F_ObjectBatchRename_suffixNumber = bpy.props.IntProperty(name= "FastOpsRename SuffixNumber", default=3)
+bpy.types.Scene.F_ObjectBatchRename_suffixStart = bpy.props.IntProperty(name= "FastOpsRename SuffixStart", default=0)
+## add suffix
+bpy.types.Scene.F_ObjectBatchRename_isOnlyAddSuffix = bpy.props.BoolProperty(name= "FastOpsRename IsOnlyAddSuffix",default=False)
+bpy.types.Scene.F_ObjectBatchRename_addSuffix = bpy.props.StringProperty(name= "FastOpsRename SetSuffix", default="")
 
 class F_OT_ObjectBatchRename(bpy.types.Operator):
     """Batch Rename"""
@@ -21,11 +18,11 @@ class F_OT_ObjectBatchRename(bpy.types.Operator):
     bl_label = "Batch Rename"
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context: Context):
-        prefix = context.scene.FastOpsObjectBatchRename_namePrefix
-        suffix_start = context.scene.FastOpsObjectBatchRename_suffixStart
-        suffix_number = context.scene.FastOpsObjectBatchRename_suffixNumber
-        suffix = context.scene.FastOpsObjectBatchRename_addSuffix
-        is_only_suffix = context.scene.FastOpsObjectBatchRename_isOnlyAddSuffix
+        prefix = context.scene.F_ObjectBatchRename_namePrefix
+        suffix_start = context.scene.F_ObjectBatchRename_suffixStart
+        suffix_number = context.scene.F_ObjectBatchRename_suffixNumber
+        suffix = context.scene.F_ObjectBatchRename_addSuffix
+        is_only_suffix = context.scene.F_ObjectBatchRename_isOnlyAddSuffix
 
         # 1.general rename
         if not is_only_suffix:
@@ -77,6 +74,10 @@ class F_OT_SetMeshName(bpy.types.Operator):
         self.report({'INFO'}, f"{cout} mesh changed,{empty_cout} objects ignored")
         return {'FINISHED'}
 
+# F_OT_FindAndReplace
+bpy.types.Scene.FastOpsObjectBatchRename_find = bpy.props.StringProperty(name= "FastOpsRename Find", default= "")
+bpy.types.Scene.FastOpsObjectBatchRename_replace = bpy.props.StringProperty(name= "FastOpsRename Replace", default= "")
+
 class F_OT_FindAndReplace(bpy.types.Operator):
     """Replace Object Name"""
     bl_idname = "object.fastops_find_and_replace"
@@ -102,19 +103,49 @@ class F_OT_FindAndReplace(bpy.types.Operator):
 class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
     """Rename by active material name"""
     bl_idname = "object.fastops_rename_by_active_material_name"
-    bl_label = "Rename By Active Material Name"
+    bl_label = "Rename By Active Material"
     bl_options = {'REGISTER', 'UNDO'}
+
+    is_only_obj: bpy.props.BoolProperty(name="Is Only Object", default=False)# type:ignore
+    set_mesh_name: bpy.props.BoolProperty(name="Set Mesh Name", default=True)# type:ignore
+
     def execute(self, context: Context):
         # scene property
-        suffix_number = context.scene.FastOpsObjectBatchRename_suffixNumber
-        suffix_start = context.scene.FastOpsObjectBatchRename_suffixStart
+        suffix_number = context.scene.F_ObjectBatchRename_suffixNumber
+        suffix_start = context.scene.F_ObjectBatchRename_suffixStart
+        is_only_obj = self.is_only_obj
+        set_mesh_name = self.set_mesh_name
+
         # alias
         selected = bpy.context.selected_objects
         # variable
-        mat_name_list =[]
-        obj_name_list =[]
+        mat_name_list=[]
+        obj_name_list=[]
+        ignore_list=[]
         empty_cout=0
         changed_count=0
+        # Is Only Object
+        if is_only_obj:
+            # Body
+            for obj in selected:
+                if obj.active_material.users == 1:
+                    obj.name = obj.active_material.name
+                    changed_count+=1
+                else:
+                    ignore_list.append(obj.name)
+            # Report
+            if len(ignore_list) > 0:
+                self.report({'INFO'}, f"{changed_count} Changed!,\tIgnored:{ignore_list}")
+                bpy.ops.object.select_all(action='DESELECT')
+                # Select Ignored
+                for name in ignore_list:
+                    bpy.data.objects[name].select_set(True)
+            else:
+                self.report({'INFO'}, f"Done!")
+            # Do Set Mesh Name
+            if set_mesh_name:
+                bpy.ops.object.fastops_set_mesh_name()
+            return {'FINISHED'}
 
         # 1.get selected objects active material name by traversal
         for obj in selected:
@@ -152,6 +183,7 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
             for obj_name in obj_name_list:
                 # if slots[0] == mat_name : rename and store objects
                 if mat_name == bpy.data.objects[obj_name].material_slots[0].name:
+                    bpy.data.objects[obj_name].select_set(True)
                     # obj name is same as changed name
                     remove_obj_name.append(obj_name)
                     if bpy.data.objects[obj_name].name == f"{mat_name}.{name_count:>0{suffix_number}}":
@@ -165,12 +197,17 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
                         # debug
                         print(f"\033[33m >> {mat_name}:{obj_name} << \033[0m ")
                         print(f"\033[32m suffix count:{name_count} \033[0m ")
-                        
             # from origin list remove renamed object list
             obj_name_list = list(set(obj_name_list) - set(remove_obj_name))
+        if set_mesh_name:
+            bpy.ops.object.fastops_set_mesh_name()
         # 9.report info
         self.report({'INFO'}, f"{changed_count} object renamed, {empty_cout} objects ignored")
         return {'FINISHED'}
+    def invoke(self, context: Context, event):
+        # wm = context.window_manager
+        # return wm.invoke_props_dialog(self)
+        return self.execute(context)
     
 _cls=[
     F_OT_ObjectBatchRename,

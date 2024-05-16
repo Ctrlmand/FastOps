@@ -1,6 +1,6 @@
 from bpy import utils
 # Register A List Of Class
-def register(label: str, class_list: list) -> None:
+def Register(label: str, class_list: list) -> None:
     print(f"\033[33m >> {label} << \033[0m")
     for cls in class_list:
         # print element
@@ -8,7 +8,7 @@ def register(label: str, class_list: list) -> None:
         utils.register_class(cls)
     return None
 # Unregist A List Of Class
-def unregister(label: str, class_list: list) -> None:
+def Unregister(label: str, class_list: list) -> None:
     print(f"\033[33m >> {label} << \033[0m")
     for cls in class_list:
         # print element
