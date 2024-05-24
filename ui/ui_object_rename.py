@@ -33,9 +33,8 @@ class FASTOPS_PT_RenameSideBar(bpy.types.Panel):
         row.prop(context.scene, "F_ObjectBatchRename_isOnlyAddSuffix", text= "Only Suffix")
 
         #call operator
-        row = box.row(align= True)
+        row = box.row()
         row.operator(object_rename.F_OT_ObjectBatchRename.bl_idname, text="Rename")
-        row.operator(object_rename.F_OT_SetMeshName.bl_idname, text="SetName")
 
         #group by name
         row = box.row()

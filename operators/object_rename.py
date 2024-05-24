@@ -47,6 +47,8 @@ class F_OT_ObjectBatchRename(bpy.types.Operator):
                 ...
             # 7.report changed object's count
             self.report({'INFO'}, f"{count} objects renamed")
+            
+        bpy.ops.object.fastops_set_mesh_name()
         return {'FINISHED'}
 
 class F_OT_SetMeshName(bpy.types.Operator):
