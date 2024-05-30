@@ -21,7 +21,6 @@ class F_OT_AddModifier(bpy.types.Operator):
             ('SOLIDIFY', 'Solidify', ''),
             ('BEVEL', 'Bevel', ''),
             ('WEIGHTED_NORMAL', 'Weighted Normal', ''),
-            ('DECIMATE', 'Decimate', ''),
             ('ARRAY', 'Array', ''),
             ('WELD', 'Weld', ''),
             ('SHRINKWRAP', 'Shrinkwrap', '')
@@ -371,6 +370,8 @@ class F_OT_ClearAllModifier(bpy.types.Operator):
             context.view_layer.objects.active = obj
             for mod in obj.modifiers:
                 bpy.ops.object.modifier_remove(modifier=mod.name)
+        # set shade flat
+        bpy.ops.object.shade_flat()
 
         self.report({'INFO'}, f"{len(selected_objects)} Objects Cleared; Modifiers Total:{len(obj.modifiers)}")
         return {'FINISHED'}
