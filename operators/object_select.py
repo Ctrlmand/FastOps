@@ -2,6 +2,8 @@ from typing import Set
 import bpy
 import re
 from bpy.types import Context
+from typing import Union
+from ..utility.info import P
 
 # scene property
 bpy.types.Scene.FastOpsObjectSelectBy = bpy.props.EnumProperty(
@@ -126,7 +128,141 @@ class F_OT_SelectObjectByMaterial(bpy.types.Operator):
         layout.prop_search(self, "material_name", bpy.data, "materials")
         ...
 
+class F_OT_SelectByModifier(bpy.types.Operator):
+    """Select Object By Modifier"""
+    bl_idname = 'object.fastops_select_object_by_modifier'
+    bl_label = "Select Object By Modifier"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    modifier_type: bpy.props.EnumProperty( # type: ignore
+        name = "Modifier Type",
+        description = "Modifier Type Enum",
+        items=(
+            ('DATA_TRANSFER','Data_Transfer', ''),
+            ('MESH_CACHE','Mesh_Cache', ''),
+            ('MESH_SEQUENCE_CACHE','Mesh_Sequence_Cache', ''),
+            ('NORMAL_EDIT','Normal_Edit', ''),
+            ('WEIGHTED_NORMAL','Weighted_Normal', ''),
+            ('UV_PROJECT','Uv_Project', ''),
+            ('UV_WARP','Uv_Warp', ''),
+            ('VERTEX_WEIGHT_EDIT','Vertex_Weight_Edit', ''),
+            ('VERTEX_WEIGHT_MIX','Vertex_Weight_Mix', ''),
+            ('VERTEX_WEIGHT_PROXIMITY','Vertex_Weight_Proximity', ''),
+            ('ARRAY','Array', ''),
+            ('BEVEL','Bevel', ''),
+            ('BOOLEAN','Boolean', ''),
+            ('BUILD','Build', ''),
+            ('DECIMATE','Decimate', ''),
+            ('EDGE_SPLIT','Edge_Split', ''),
+            ('NODES','Nodes', ''),
+            ('MASK','Mask', ''),
+            ('MIRROR','Mirror', ''),
+            ('MULTIRES','Multires', ''),
+            ('REMESH','Remesh', ''),
+            ('SCREW','Screw', ''),
+            ('SKIN','Skin', ''),
+            ('SOLIDIFY','Solidify', ''),
+            ('SUBSURF','Subsurf', ''),
+            ('TRIANGULATE','Triangulate', ''),
+            ('VOLUME_TO_MESH','Volume_To_Mesh', ''),
+            ('WELD','Weld', ''),
+            ('WIREFRAME','Wireframe', ''),
+            ('ARMATURE','Armature', ''),
+            ('CAST','Cast', ''),
+            ('CURVE','Curve', ''),
+            ('DISPLACE','Displace', ''),
+            ('HOOK','Hook', ''),
+            ('LAPLACIANDEFORM','Laplaciandeform', ''),
+            ('LATTICE','Lattice', ''),
+            ('MESH_DEFORM','Mesh_Deform', ''),
+            ('SHRINKWRAP','Shrinkwrap', ''),
+            ('SIMPLE_DEFORM','Simple_Deform', ''),
+            ('SMOOTH','Smooth', ''),
+            ('CORRECTIVE_SMOOTH','Corrective_Smooth', ''),
+            ('LAPLACIANSMOOTH','Laplaciansmooth', ''),
+            ('SURFACE_DEFORM','Surface_Deform', ''),
+            ('WARP','Warp', ''),
+            ('WAVE','Wave', ''),
+            ('CLOTH','Cloth', ''),
+            ('COLLISION','Collision', ''),
+            ('DYNAMIC_PAINT','Dynamic_Paint', ''),
+            ('EXPLODE','Explode', ''),
+            ('FLUID','Fluid', ''),
+            ('OCEAN','Ocean', ''),
+            ('PARTICLE_INSTANCE','Particle_Instance', ''),
+            ('PARTICLE_SYSTEM','Particle_System', ''),
+            ('SOFT_BODY','Soft_Body',''),
+        ),
+        default= 'MIRROR',
+    )
+    
+    def execute(self, context: Context):
+        # alias
+        selected_obj = context.selected_objects
+        viewlayer_obj = context.view_layer.objects
+
+        # selected_obj mount
+        if len(selected_obj) == 0:
+            self.select_by_modifier(modifier = self.modifier_type, ineration_obj = viewlayer_obj, is_enum = True)
+
+        elif len(selected_obj) == 1:
+            self.select_by_modifier(modifier = context.object.modifiers.keys(), ineration_obj = viewlayer_obj, is_enum = False)
+
+        elif len(selected_obj) > 1:
+            self.select_by_modifier(modifier = context.object.modifiers.keys(), ineration_obj = selected_obj, is_enum = False)
+        
+        # for obj in ineration_obj:
+        #     if not ((obj.type == 'MESH') and (self.modifier_type in obj.modifiers.keys())):
+        #         obj.select_set(False)
+
+        return {"FINISHED"}
+    
+
+    # @classmethod
+    def select_by_modifier(self, modifier: Union[list, bpy.types.EnumProperty], ineration_obj: bpy.types.bpy_prop_collection, is_enum: bool) -> None:
+        resault_list=[]
+
+        # list
+        if type(modifier) == list:
+            tmp_list=[]
+            for string in modifier:
+               tmp_list.append(str.title(string))
+            modifier = tmp_list
+
+            self.find_key_in_list(modifier, ineration_obj, resault_list, is_enum)
+        # str
+        else:
+            modifier = str.title(modifier)
+
+            self.find_key_in_list(modifier, ineration_obj, resault_list, is_enum)
+
+        # reselect obj
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in resault_list:
+            bpy.data.objects[obj].select_set(True)
+        self.report({'INFO'}, f"{len(resault_list)} Objects Selected")
+
+        # Debug
+        P(94, f"Selected List:")
+        P(93, f"{resault_list}")
+
+    @classmethod
+    def find_key_in_list(self, modifier: Union[list, str], ineration_obj: bpy.types.bpy_prop_collection, resault_list: list, is_enum: bool = False):
+        if is_enum:
+            for obj in ineration_obj:
+                # P(37, f"modifier: {modifier}")
+                if (obj.type == 'MESH') and (modifier in obj.modifiers.keys()):
+                    # P(37, obj.name)
+                    resault_list.append(obj.name)
+        else:
+            for obj in ineration_obj:
+                # P(37, f"modifier: {modifier}")
+                if (obj.type == 'MESH') and (modifier == obj.modifiers.keys()):
+                    # P(37, obj.name)
+                    resault_list.append(obj.name)
+
 _cls=[
     F_OT_SelectObjectByName,
     F_OT_SelectObjectByMaterial,
+    F_OT_SelectByModifier,
 ]

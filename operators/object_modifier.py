@@ -15,7 +15,6 @@ class F_OT_AddModifier(bpy.types.Operator):
     modifier_type: bpy.props.EnumProperty( # type: ignore
         name = "Modifier Type",
         description = "Modifier Type",
-        default = 'MIRROR',
         items =(
             ('MIRROR', 'Mirror', ''),
             ('SOLIDIFY', 'Solidify', ''),
@@ -25,6 +24,7 @@ class F_OT_AddModifier(bpy.types.Operator):
             ('WELD', 'Weld', ''),
             ('SHRINKWRAP', 'Shrinkwrap', '')
         ),
+        default = 'MIRROR',
     )
 
     # Bevel
@@ -56,13 +56,13 @@ class F_OT_AddModifier(bpy.types.Operator):
     bevel_limit_method: bpy.props.EnumProperty(# type: ignore
         name = "Bevel Limit Method",
         description = "Bevel Limit Method",
-        default = 'ANGLE',
         items =(
             ('NONE', "None", "None"),
             ('ANGLE', 'Angle', 'Angle'),
             ('WEIGHT', 'Weight', 'Weight'),
             ('VGROUP', 'Vertex Group', 'Vertex Group')
         ),
+        default = 'ANGLE',
     ) 
     bevel_angle_limit: bpy.props.FloatProperty(name = "Bevel Limit Angle", step=1, default = math.acos(0.0)/3, min = 0.0, max = math.acos(0.0)*2, subtype = 'ANGLE') # type: ignore
     bevel_profile: bpy.props.FloatProperty(name= "Bevel Profile", default=0.5, min=0, max=1) # type: ignore
@@ -128,7 +128,7 @@ class F_OT_AddModifier(bpy.types.Operator):
            # interation
            for obj in selected_objects:
                 context.view_layer.objects.active = obj
-                obj.modifiers.new(name=self.modifier_type, type = self.modifier_type)
+                obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
 
                 mod=obj.modifiers[-1]
                 # Bevel
@@ -151,7 +151,7 @@ class F_OT_AddModifier(bpy.types.Operator):
         # Mirror
         elif self.modifier_type == 'MIRROR':
             # add modifier
-            active_object.modifiers.new(name=self.modifier_type, type = self.modifier_type)
+            active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
 
             mod = context.object.modifiers[-1]
             
@@ -186,7 +186,7 @@ class F_OT_AddModifier(bpy.types.Operator):
         
         # Solidify
         elif self.modifier_type == 'SOLIDIFY':
-            active_object.modifiers.new(name=self.modifier_type, type = self.modifier_type)
+            active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
             mod = context.object.modifiers[-1]
 
             mod.thickness = self.solidify_thickness
@@ -198,7 +198,7 @@ class F_OT_AddModifier(bpy.types.Operator):
         # Shrinkwrap
         elif self.modifier_type == 'SHRINKWRAP':
             # add modifier
-            active_object.modifiers.new(name=self.modifier_type, type = self.modifier_type)
+            active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
 
             mod = context.object.modifiers[-1]
             
@@ -224,7 +224,7 @@ class F_OT_AddModifier(bpy.types.Operator):
 
         # Array
         elif self.modifier_type == 'ARRAY':
-            active_object.modifiers.new(name=self.modifier_type, type = self.modifier_type)
+            active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
             mod = mod = context.object.modifiers[-1]
 
             # set axis
@@ -266,7 +266,7 @@ class F_OT_AddModifier(bpy.types.Operator):
         # Basic
         else:
             for obj in selected_objects:
-                obj.modifiers.new(name=self.modifier_type, type = self.modifier_type)
+                obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
         self.report({'INFO'}, f"{len(selected_objects)} Objects Added <{self.modifier_type}>")
         
         return {'FINISHED'}

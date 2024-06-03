@@ -35,6 +35,7 @@ Addon for Blender.
 * __WeightedNormal__ : _Nothing different_
 * __Weld__ :  _Nothing different_
 * __ClearAll__ : _As you think~_
+* __SelectByModifier__ : When 0 object selected, it will search modifier in view layer, you need choose a modifier to select.When 1 object selected, it will search obj has same modifier in view layer.When more than 1 objects selected, it will search obj has same modifier in selected objects.
 
 #### About Material ( Shortcut: Ctrl F )
 * __Flood Empty Material__ : Set empty material slot to default material.
