@@ -5,12 +5,12 @@ from bpy.types import Context
 
 # F_OT_ObjectBatchRename
 ## rename
-bpy.types.Scene.F_ObjectBatchRename_namePrefix = bpy.props.StringProperty(name= "FastOpsRename NamePrefix", default="")
-bpy.types.Scene.F_ObjectBatchRename_suffixNumber = bpy.props.IntProperty(name= "FastOpsRename SuffixNumber", default=3)
-bpy.types.Scene.F_ObjectBatchRename_suffixStart = bpy.props.IntProperty(name= "FastOpsRename SuffixStart", default=0)
+bpy.types.Scene.F_ObjectBatchRename_namePrefix = bpy.props.StringProperty(name= "F_Rename_Object NamePrefix", default="")
+bpy.types.Scene.F_ObjectBatchRename_suffixNumber = bpy.props.IntProperty(name= "F_Rename_Object SuffixNumber", default=3)
+bpy.types.Scene.F_ObjectBatchRename_suffixStart = bpy.props.IntProperty(name= "F_Rename_Object SuffixStart", default=0)
 ## add suffix
-bpy.types.Scene.F_ObjectBatchRename_isOnlyAddSuffix = bpy.props.BoolProperty(name= "FastOpsRename IsOnlyAddSuffix",default=False)
-bpy.types.Scene.F_ObjectBatchRename_addSuffix = bpy.props.StringProperty(name= "FastOpsRename SetSuffix", default="")
+bpy.types.Scene.F_ObjectBatchRename_isOnlyAddSuffix = bpy.props.BoolProperty(name= "F_Rename_Object IsOnlyAddSuffix",default=False)
+bpy.types.Scene.F_ObjectBatchRename_addSuffix = bpy.props.StringProperty(name= "F_Rename_Object SetSuffix", default="")
 
 class F_OT_ObjectBatchRename(bpy.types.Operator):
     """Batch Rename"""
@@ -77,8 +77,8 @@ class F_OT_SetMeshName(bpy.types.Operator):
         return {'FINISHED'}
 
 # F_OT_FindAndReplace
-bpy.types.Scene.FastOpsObjectBatchRename_find = bpy.props.StringProperty(name= "FastOpsRename Find", default= "")
-bpy.types.Scene.FastOpsObjectBatchRename_replace = bpy.props.StringProperty(name= "FastOpsRename Replace", default= "")
+bpy.types.Scene.FastOpsObjectBatchRename_find = bpy.props.StringProperty(name= "F_Rename_Object Find", default= "")
+bpy.types.Scene.FastOpsObjectBatchRename_replace = bpy.props.StringProperty(name= "F_Rename_Object Replace", default= "")
 
 class F_OT_FindAndReplace(bpy.types.Operator):
     """Replace Object Name"""
@@ -185,9 +185,10 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
             for obj_name in obj_name_list:
                 # if slots[0] == mat_name : rename and store objects
                 if mat_name == bpy.data.objects[obj_name].material_slots[0].name:
-                    bpy.data.objects[obj_name].select_set(True)
-                    # obj name is same as changed name
+                    if obj_name in bpy.context.view_layer:
+                        bpy.data.objects[obj_name].select_set(True)
                     remove_obj_name.append(obj_name)
+                    # obj name is same as changed name
                     if bpy.data.objects[obj_name].name == f"{mat_name}.{name_count:>0{suffix_number}}":
                         name_count+=1
                         empty_cout+=1
@@ -210,10 +211,45 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
         # wm = context.window_manager
         # return wm.invoke_props_dialog(self)
         return self.execute(context)
+
+bpy.types.Scene.F_EditMaterialNameInSelectedObjects_namePrefix = bpy.props.StringProperty(name="F_Rename_Material Prefix", default="")
+
+class F_OT_EditMaterialNameInSelectedObjects(bpy.types.Operator):
+    """Edit Material Name In Selected Objects"""
+    bl_idname = "object.fastops_edit_material_name_in_selected_objects"
+    bl_label = "Edit Material Name In Selected Objects"
+    bl_options = {'REGISTER', 'UNDO'}
     
+
+    def execute(self, context: Context):
+        C = bpy.context
+        D = bpy.data
+        
+        prefix= context.scene.F_EditMaterialNameInSelectedObjects_namePrefix
+        ignore=0
+
+        p = re.compile(f"{prefix}")
+
+        mat_set = set(C.object.material_slots.keys())
+        for mat in mat_set:
+            if p.match(f"{mat}"):
+                ignore +=1
+                continue
+            else:
+                D.materials[mat].name = f"{prefix}{D.materials[mat].name}"
+
+        self.report({'INFO'}, f"{len(mat_set)-ignore} materials renamed, {ignore} materials ignored")
+        return {'FINISHED'}
+    # def invoke(self, context: Context, event):
+
+    #     wm = context.window_manager
+    #     return wm.invoke_props_dialog(self)
+
+
 _cls=[
     F_OT_ObjectBatchRename,
     F_OT_SetMeshName,
     F_OT_FindAndReplace,
     F_OT_RenameByActiveMaterialName,
+    F_OT_EditMaterialNameInSelectedObjects,
 ]

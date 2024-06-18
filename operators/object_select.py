@@ -107,9 +107,10 @@ class F_OT_SelectObjectByMaterial(bpy.types.Operator):
             if mat_index == -1:
                 continue
             else:
-                obj.select_set(True)
-                count+=1
                 last_obj=obj
+                if obj.name in context.view_layer:
+                    obj.select_set(True)
+                    count+=1
                 ...
         context.view_layer.objects.active = last_obj
         if count >0:
