@@ -3,7 +3,7 @@ from bpy.types import Context
 from ..operators import object_select
 
 # Select Object Panel
-class FASTOPS_PT_SelectObject(bpy.types.Panel):
+class FASTOPS_UI_PT_SelectObject(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "FastOps"
@@ -19,5 +19,5 @@ class FASTOPS_PT_SelectObject(bpy.types.Panel):
         row.operator(object_select.F_OT_SelectObjectByName.bl_idname, text="Select!")
 
 _cls=[
-    FASTOPS_PT_SelectObject,
+    FASTOPS_UI_PT_SelectObject,
 ]

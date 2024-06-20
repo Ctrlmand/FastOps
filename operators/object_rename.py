@@ -1,7 +1,8 @@
-from typing import Any, Set
 import bpy
 import re
+from typing import Any, Set
 from bpy.types import Context
+from ..utility.debug import P
 
 # F_OT_ObjectBatchRename
 ## rename
@@ -124,6 +125,7 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
         mat_name_list=[]
         obj_name_list=[]
         ignore_list=[]
+        null_mat_obj_list=[]
         empty_cout=0
         changed_count=0
         # Is Only Object
@@ -155,29 +157,35 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
             if obj.type != "MESH":
                 empty_cout+=1
                 continue
+            if obj.active_material == None:
+                null_mat_obj_list.append(obj.name)
+                continue
             mat_name_list.append(obj.active_material.name)
         # 2.convert to set
         mat_name_set = set(mat_name_list)
+
         #debug
-        print(f"\033[33m >> material set: << \033[0m")
-        print(f"\033[32m (mat):{mat_name_set} \033[0m ")
+        # P(94, f">> material set: <<")
+        # P(93, f"(mat):{mat_name_set}")
+
         # 3.get object list
         for mat_name in mat_name_set:
             # 4.find obj in scene
             for obj in bpy.data.objects:
-                # 5.ignore other type
+                # 5.if have same material
+                P(94, f"{obj.name}")
                 if obj.type != "MESH" or obj.active_material == None:
                     continue
-                # 6.if have same material
                 if obj.active_material.name == mat_name:
-                    # 7.store in list
+                    # 6.store in list
                     obj_name_list.append(obj.name)
                     # print(f"\033[32m >> {obj.name} << \033[0m")
         # debug
-        print(f"\033[33m >> object list: << \033[0m ")
-        print(f"\033[32m (object):{obj_name_list} \033[0m ")
+        # P(94, f">> object list: <<")
+        # P(94, f"(object):{obj_name_list}")
+
         # 8.rename object
-        remove_obj_name=[]
+        removed_obj_name=[]
         # mat
         for mat_name in mat_name_set:
             name_count=suffix_start # start with each mat
@@ -187,7 +195,7 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
                 if mat_name == bpy.data.objects[obj_name].material_slots[0].name:
                     if obj_name in bpy.context.view_layer:
                         bpy.data.objects[obj_name].select_set(True)
-                    remove_obj_name.append(obj_name)
+                    removed_obj_name.append(obj_name)
                     # obj name is same as changed name
                     if bpy.data.objects[obj_name].name == f"{mat_name}.{name_count:>0{suffix_number}}":
                         name_count+=1
@@ -198,14 +206,24 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
                         name_count+=1
                         changed_count+=1
                         # debug
-                        print(f"\033[33m >> {mat_name}:{obj_name} << \033[0m ")
-                        print(f"\033[32m suffix count:{name_count} \033[0m ")
+                        # P(33, f">> {mat_name}:{obj_name} <<")
+                        # P(32, f"suffix count:{name_count}")
             # from origin list remove renamed object list
-            obj_name_list = list(set(obj_name_list) - set(remove_obj_name))
+            obj_name_list = list(set(obj_name_list) - set(removed_obj_name))
         if set_mesh_name:
             bpy.ops.object.fastops_set_mesh_name()
         # 9.report info
-        self.report({'INFO'}, f"{changed_count} object renamed, {empty_cout} objects ignored")
+        if changed_count == 0 and empty_cout == 0:
+            self.report({'WARNING'}, f"Nothing changed")
+        else:
+            self.report({'INFO'}, f"{changed_count} object renamed, {empty_cout} objects ignored")
+
+        if len(null_mat_obj_list) > 0:
+            bpy.ops.object.select_all(action='DESELECT')
+            for name in null_mat_obj_list:
+                bpy.data.objects[name].select_set(True)
+            self.report({'WARNING'}, f"{len(null_mat_obj_list)} objects have no material")
+            ...
         return {'FINISHED'}
     def invoke(self, context: Context, event):
         # wm = context.window_manager

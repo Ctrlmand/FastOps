@@ -1,5 +1,6 @@
 import bpy
 from .. import operators, ui
+from ..utility.debug import P_row
 
 
 # keymap list
@@ -44,7 +45,7 @@ def register():
     km_node_editor = wm.keyconfigs.addon.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
 
     kmi_node_editor_call_menu_pie = km_node_editor.keymap_items.new('wm.call_menu_pie', 'F', 'PRESS', ctrl=False, shift=False, alt=False)
-    kmi_node_editor_call_menu_pie.properties.name = ui.ui_node_option.FASTOPS_MT_NodeOptionPieMenu.bl_idname
+    kmi_node_editor_call_menu_pie.properties.name = ui.pie_NodeEditor.FASTOPS_MT_NodeOptionPieMenu.bl_idname
 
     ## append to km
     node_editor_kmi_list=[
@@ -70,12 +71,14 @@ def register():
   
 
     # >> debug << 
-    print(f"\033[33m >> KM REGISTED << \033[0m")
+    P_row(col_info= 96, info = ">> KM REGISTED <<", separator='-', separator_col=96, side="-")
     # traverse km and kmi
     for km, kmi_list in addon_km:
-        print(f"\033[32m {km.name}: \033[0m")
+        P_row(col_info= 36, info = f"> {km.name} <", separator='', separator_col=96, side="|")
         for kmi in kmi_list:
-            print(f"    \033[32m {kmi.name} \033[0m")
+            P_row(col_info= 32, info = f"{kmi.name}", separator='', separator_col=96, side="|", left=True)
+    # end
+    P_row(col_info=96, info=f"", separator="-",separator_col=96, side= "-")
 # Unregister
 def unregister():
     for km, kmi_list in addon_km:

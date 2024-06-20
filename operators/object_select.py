@@ -3,7 +3,7 @@ import bpy
 import re
 from bpy.types import Context
 from typing import Union
-from ..utility.info import P
+from ..utility.debug import P
 
 # scene property
 bpy.types.Scene.FastOpsObjectSelectBy = bpy.props.EnumProperty(

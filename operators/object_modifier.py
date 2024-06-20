@@ -1,7 +1,7 @@
 from typing import Any
 import bpy
 from bpy.types import Context
-from ..utility.info import P
+from ..utility.debug import P
 import math
 from mathutils import Vector
 

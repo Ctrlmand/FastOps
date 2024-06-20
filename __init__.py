@@ -13,7 +13,7 @@ import bpy
 from . import operators
 from . import ui
 from . import keymap
-from .utility import register_list
+from .utility.debug import P
 # operator list
 _cls = operators._modcls + ui._modcls
 classes = _cls
@@ -27,6 +27,12 @@ def register():
 
     # Registe keymap
     keymap.km_handle.register()
+
+    # No error
+    P(31, "------------------")
+    P(31, "| So Far So Good |")
+    P(31, "------------------")
+    
 def unregister():
     # UnRegister Operator
     operators.unregister()
