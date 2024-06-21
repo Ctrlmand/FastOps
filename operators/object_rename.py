@@ -2,6 +2,7 @@ import bpy
 import re
 from typing import Any, Set
 from bpy.types import Context
+from ..utility.base_class import Operator
 from ..utility.debug import P
 
 # F_OT_ObjectBatchRename
@@ -13,9 +14,9 @@ bpy.types.Scene.F_ObjectBatchRename_suffixStart = bpy.props.IntProperty(name= "F
 bpy.types.Scene.F_ObjectBatchRename_isOnlyAddSuffix = bpy.props.BoolProperty(name= "F_Rename_Object IsOnlyAddSuffix",default=False)
 bpy.types.Scene.F_ObjectBatchRename_addSuffix = bpy.props.StringProperty(name= "F_Rename_Object SetSuffix", default="")
 
-class F_OT_ObjectBatchRename(bpy.types.Operator):
+class F_OT_ObjectBatchRename(Operator):
     """Batch Rename"""
-    bl_idname = "object.fastops_batch_rename"
+    bl_idname = "object.f_batch_rename"
     bl_label = "Batch Rename"
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context: Context):
@@ -37,7 +38,7 @@ class F_OT_ObjectBatchRename(bpy.types.Operator):
                 count=index+1
                 ...
             # 5.report changed object's count
-            self.report({'INFO'}, f"{count} objects renamed")
+            self.Log(f"{count} objects renamed")
 
         # 6.only add suffix
         else:
@@ -47,14 +48,14 @@ class F_OT_ObjectBatchRename(bpy.types.Operator):
                 count+=1
                 ...
             # 7.report changed object's count
-            self.report({'INFO'}, f"{count} objects renamed")
+            self.Log(f"{count} objects renamed")
             
-        bpy.ops.object.fastops_set_mesh_name()
+        bpy.ops.object.f_set_mesh_name()
         return {'FINISHED'}
 
-class F_OT_SetMeshName(bpy.types.Operator):
+class F_OT_SetMeshName(Operator):
     """Set Mesh Name"""
-    bl_idname = "object.fastops_set_mesh_name"
+    bl_idname = "object.f_set_mesh_name"
     bl_label = "Set Mesh Name"
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context: Context):
@@ -74,7 +75,7 @@ class F_OT_SetMeshName(bpy.types.Operator):
             cout+=1
             ...
         # 4.report changed object's count
-        self.report({'INFO'}, f"{cout} mesh changed,{empty_cout} objects ignored")
+        self.Log(f"{cout} mesh changed,{empty_cout} objects ignored")
         return {'FINISHED'}
 
 # F_OT_FindAndReplace
@@ -83,7 +84,7 @@ bpy.types.Scene.FastOpsObjectBatchRename_replace = bpy.props.StringProperty(name
 
 class F_OT_FindAndReplace(bpy.types.Operator):
     """Replace Object Name"""
-    bl_idname = "object.fastops_find_and_replace"
+    bl_idname = "object.f_find_and_replace"
     bl_label = "Find And Replace Object Name"
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context: Context):
@@ -99,13 +100,13 @@ class F_OT_FindAndReplace(bpy.types.Operator):
             # obj.name = obj.name.replace(pattern, replace)
             count=index
             ...
-        self.report({'INFO'}, f"{count}object name changed")
+        self.Log(f"{count}object name changed")
         ...
         return {'FINISHED'}
 
-class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
+class F_OT_RenameByActiveMaterialName(Operator):
     """Rename by active material name"""
-    bl_idname = "object.fastops_rename_by_active_material_name"
+    bl_idname = "object.f_rename_by_active_material_name"
     bl_label = "Rename By Active Material"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -139,16 +140,16 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
                     ignore_list.append(obj.name)
             # Report
             if len(ignore_list) > 0:
-                self.report({'INFO'}, f"{changed_count} Changed!,\tIgnored:{ignore_list}")
+                self.Log(f"{changed_count} Changed!,\tIgnored:{ignore_list}")
                 bpy.ops.object.select_all(action='DESELECT')
                 # Select Ignored
                 for name in ignore_list:
                     bpy.data.objects[name].select_set(True)
             else:
-                self.report({'INFO'}, f"Done!")
+                self.Log(f"Done!")
             # Do Set Mesh Name
             if set_mesh_name:
-                bpy.ops.object.fastops_set_mesh_name()
+                bpy.ops.object.f_set_mesh_name()
             return {'FINISHED'}
 
         # 1.get selected objects active material name by traversal
@@ -211,18 +212,18 @@ class F_OT_RenameByActiveMaterialName(bpy.types.Operator):
             # from origin list remove renamed object list
             obj_name_list = list(set(obj_name_list) - set(removed_obj_name))
         if set_mesh_name:
-            bpy.ops.object.fastops_set_mesh_name()
+            bpy.ops.object.f_set_mesh_name()
         # 9.report info
         if changed_count == 0 and empty_cout == 0:
-            self.report({'WARNING'}, f"Nothing changed")
+            self.Warning(f"Nothing changed")
         else:
-            self.report({'INFO'}, f"{changed_count} object renamed, {empty_cout} objects ignored")
+            self.Log(f"{changed_count} object renamed, {empty_cout} objects ignored")
 
         if len(null_mat_obj_list) > 0:
             bpy.ops.object.select_all(action='DESELECT')
             for name in null_mat_obj_list:
                 bpy.data.objects[name].select_set(True)
-            self.report({'WARNING'}, f"{len(null_mat_obj_list)} objects have no material")
+            self.Warning(f"{len(null_mat_obj_list)} objects have no material")
             ...
         return {'FINISHED'}
     def invoke(self, context: Context, event):
@@ -234,7 +235,7 @@ bpy.types.Scene.F_EditMaterialNameInSelectedObjects_namePrefix = bpy.props.Strin
 
 class F_OT_EditMaterialNameInSelectedObjects(bpy.types.Operator):
     """Edit Material Name In Selected Objects"""
-    bl_idname = "object.fastops_edit_material_name_in_selected_objects"
+    bl_idname = "object.f_edit_material_name_in_selected_objects"
     bl_label = "Edit Material Name In Selected Objects"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -256,7 +257,7 @@ class F_OT_EditMaterialNameInSelectedObjects(bpy.types.Operator):
             else:
                 D.materials[mat].name = f"{prefix}{D.materials[mat].name}"
 
-        self.report({'INFO'}, f"{len(mat_set)-ignore} materials renamed, {ignore} materials ignored")
+        self.Log(f"{len(mat_set)-ignore} materials renamed, {ignore} materials ignored")
         return {'FINISHED'}
     # def invoke(self, context: Context, event):
 

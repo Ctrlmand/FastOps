@@ -4,7 +4,7 @@ from bpy.types import Context
 
 class F_OT_ImageChannelSet(bpy.types.Operator):
     """Switch Image Display Channel"""
-    bl_idname = "image.fastops_channel_set"
+    bl_idname = "image.f_channel_set"
     bl_label = "Set Channel"
     bl_options = {'REGISTER', 'UNDO'}
     

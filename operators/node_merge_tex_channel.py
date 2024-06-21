@@ -1,10 +1,11 @@
 from typing import Any
 import bpy
 from bpy.types import Context 
+from ..utility.base_class import Operator
 
-class F_OT_ReportSelectedTextureNodeName(bpy.types.Operator):
+class F_OT_ReportSelectedTextureNodeName(Operator):
     """Report the name of the selected texture node"""
-    bl_idname = "node.fastops_report_selected_texture_node_name"
+    bl_idname = "node.f_report_selected_texture_node_name"
     bl_label = "Report Selected Texture Node Name"
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context: Context):
@@ -13,18 +14,18 @@ class F_OT_ReportSelectedTextureNodeName(bpy.types.Operator):
         # traverse selected nodes and report the name 
         for node in context.selected_nodes:
             if node.type == 'TEX_IMAGE':
-                self.report({'INFO'}, f"{node.image.name}")
-                self.report({'INFO'}, f"{node.image.filepath}")
-                self.report({'INFO'}, f"{node.type}")
+                self.Log(f"{node.image.name}")
+                self.Log(f"{node.image.filepath}")
+                self.Log(f"{node.type}")
                 success+=1
             else:
                 ignore+=1
-        self.report({'INFO'}, f"success:{success},ignore:{ignore}")
+        self.Log(f"success:{success},ignore:{ignore}")
         return{'FINISHED'}
 
-class F_OT_ImageNodeMergeRGBAndAlpha(bpy.types.Operator):
+class F_OT_ImageNodeMergeRGBAndAlpha(Operator):
     """Image Node Merge RGB And Alpha"""
-    bl_idname = "node.fastops_image_node_merge_rgb_and_alpha"
+    bl_idname = "node.f_image_node_merge_rgb_and_alpha"
     bl_label = "Image Node Merge RGB And Alpha"
     bl_options = {'REGISTER', 'UNDO'}
     # method of merge rgb and a
@@ -58,7 +59,7 @@ class F_OT_ImageNodeMergeRGBAndAlpha(bpy.types.Operator):
         a_image = bpy.data.images[a_name]
         # check size
         if rgb_image.size[0] != a_image.size[0] or rgb_image.size[1] != a_image.size[1]:
-            self.report({'ERROR'}, f"{rgb_name} and {a_name} size not equal")
+            self.Error(f"{rgb_name} and {a_name} size not equal")
             return {'CANCELLED'}
         # check final image exist in database
         if not f"{rgb_name}_WithAlpha" in bpy.data.images:

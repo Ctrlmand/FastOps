@@ -2,11 +2,12 @@ from typing import Set
 import bpy
 import re
 from bpy.types import Context
+from ..utility.base_class import Operator
 
 
-class F_OT_ObjMoveToCollectionByName(bpy.types.Operator):
+class F_OT_ObjMoveToCollectionByName(Operator):
     """Move Objects to Collection by Name"""
-    bl_idname = "object.fastops_obj_move_collection_by_name"
+    bl_idname = "object.f_obj_move_collection_by_name"
     bl_label = "Move Objects To Collection By Name"
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context: Context):
@@ -30,7 +31,7 @@ class F_OT_ObjMoveToCollectionByName(bpy.types.Operator):
             name_tmp = re.search(r'(?P<prefix>[A-Za-z_]+)(?P<suffix>_[\w+])', obj.name)
             # error handel
             if name_tmp == None:
-                self.report({'ERROR'}, f"{obj.name} does not have prefix")
+                self.Error(f"{obj.name} does not have prefix")
                 continue
             prefix = name_tmp.group('prefix')
             # 3.if collection not exist

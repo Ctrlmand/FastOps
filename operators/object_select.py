@@ -4,6 +4,7 @@ import re
 from bpy.types import Context
 from typing import Union
 from ..utility.debug import P
+from ..utility.base_class import Operator
 
 # scene property
 bpy.types.Scene.FastOpsObjectSelectBy = bpy.props.EnumProperty(
@@ -16,13 +17,14 @@ bpy.types.Scene.FastOpsObjectSelectBy = bpy.props.EnumProperty(
     default='prefix'
 )
 
-class F_OT_SelectObjectByName(bpy.types.Operator):
+class F_OT_SelectObjectByName(Operator):
     """Select Same Prefix Objects"""
-    bl_idname = "object.fastops_select_same_prefix_objects"
+    bl_idname = "object.f_select_same_prefix_objects"
     bl_label = "Select Same Prefix Objects"
     bl_options = {'REGISTER', 'UNDO'}
     # select method
-    def select_by_name(self, context: Context, type: str):
+    def GetObjSetByName(self, context: Context, type: str):
+        """Find the object have same feature in their name; return a object set"""
         # global value
         name_regular_compile = re.compile(r'(?P<prefix>[A-Za-z_]+)(?P<index>\d+)(?P<suffix>_[\w.]+)')
         objects = context.selected_objects
@@ -30,11 +32,11 @@ class F_OT_SelectObjectByName(bpy.types.Operator):
         select_list=[]
         # make sure is objects
         if not objects:
-            self.report({'ERROR'}, "No Objects Selected")
+            self.Error("No Objects Selected")
             return {'CANCELLED'}
         # make sure is right value
         if type not in {'prefix', 'suffix', 'both'}:
-            self.report({'ERROR'}, "Invalid Type")
+            self.Error("Invalid Type")
             return {'CANCELLED'}
         # 1.is 'prefix' or 'suffix'
         if not type  == 'both':
@@ -44,7 +46,7 @@ class F_OT_SelectObjectByName(bpy.types.Operator):
                 name_tmp = name_regular_compile.search(obj.name)
                 # make sure name is right
                 if not name_tmp:
-                    self.report({'ERROR'}, "Illegal Object Name Format")
+                    self.Error("Illegal Object Name Format")
                     return {'CANCELLED'}                # 3.select object by name part
                 target_part = name_tmp.group(type)
                 # 4.traversal in data to find...
@@ -62,11 +64,11 @@ class F_OT_SelectObjectByName(bpy.types.Operator):
                 name_tmp = name_regular_compile.search(obj.name)
                 # make sure name is right
                 if not name_tmp:
-                    self.report({'ERROR'}, "Illegal Object Name Format")
+                    self.Error("Illegal Object Name Format")
                     return {'CANCELLED'}                # 3.select object by name part
                 target_prefix = name_tmp.group('prefix')
                 target_suffix = name_tmp.group('suffix')
-                self.report({'INFO'}, f"{target_prefix} {target_suffix}")
+                self.Log(f"{target_prefix} {target_suffix}")
                 # 8.traversal in data to find...
                 for obj in bpy.data.objects:
                     # 9.if have same prefix and suffix
@@ -78,19 +80,19 @@ class F_OT_SelectObjectByName(bpy.types.Operator):
     def execute(self, context):
         # select method
         select_by = context.scene.FastOpsObjectSelectBy
-        obj_list = self.select_by_name(context, select_by)
+        obj_list = self.GetObjSetByName(context, select_by)
         if obj_list == {'CANCELLED'}:
             return {'CANCELLED'}
         # select!!!
-        self.report({'INFO'}, f"{obj_list}")
+        self.Log(f"{obj_list}")
         for obj in obj_list:
             obj.select_set(True)
-        self.report({'INFO'}, f"selected {len(obj_list)} objects")
+        self.Log(f"selected {len(obj_list)} objects")
         return {'FINISHED'}
     
-class F_OT_SelectObjectByMaterial(bpy.types.Operator):
+class F_OT_SelectObjectByMaterial(Operator):
     """Select Object By Material"""
-    bl_idname = 'object.fastops_select_object_by_material'
+    bl_idname = 'object.f_select_object_by_material'
     bl_label = "Select Object By Material"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -114,9 +116,9 @@ class F_OT_SelectObjectByMaterial(bpy.types.Operator):
                 ...
         context.view_layer.objects.active = last_obj
         if count >0:
-            self.report({'INFO'}, f"{count} Selected")
+            self.Log(f"{count} Selected")
         else:
-            self.report({'WARNING'}, f"No Object Selected")
+            self.Warning(f"No Object Selected")
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -131,7 +133,7 @@ class F_OT_SelectObjectByMaterial(bpy.types.Operator):
 
 class F_OT_SelectByModifier(bpy.types.Operator):
     """Select Object By Modifier"""
-    bl_idname = 'object.fastops_select_object_by_modifier'
+    bl_idname = 'object.f_select_object_by_modifier'
     bl_label = "Select Object By Modifier"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -241,7 +243,7 @@ class F_OT_SelectByModifier(bpy.types.Operator):
         bpy.ops.object.select_all(action='DESELECT')
         for obj in resault_list:
             bpy.data.objects[obj].select_set(True)
-        self.report({'INFO'}, f"{len(resault_list)} Objects Selected")
+        self.Log(f"{len(resault_list)} Objects Selected")
 
         # Debug
         P(94, f"Selected List:")

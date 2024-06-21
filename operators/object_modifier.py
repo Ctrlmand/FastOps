@@ -4,10 +4,11 @@ from bpy.types import Context
 from ..utility.debug import P
 import math
 from mathutils import Vector
+from ..utility.base_class import Operator
 
-class F_OT_AddModifier(bpy.types.Operator):
+class F_OT_AddModifier(Operator):
     """Batch Add Modifier To Selected Objects"""
-    bl_idname = "object.fastops_add_modifier"
+    bl_idname = "object.f_add_modifier"
     bl_label = "Modifier"
     bl_options = {'REGISTER', 'UNDO'}
     # Variables
@@ -168,7 +169,7 @@ class F_OT_AddModifier(bpy.types.Operator):
                 mod.mirror_object = mirror_obj
                 
             elif len(selected_objects) > 2 or len(selected_objects) < 1:
-                self.report({'ERROR'}, f"Please Select 1 or 2 Objects")
+                self.Error(f"Please Select 1 or 2 Objects")
                 return {'CANCELLED'}
             
             # set modifier
@@ -211,10 +212,10 @@ class F_OT_AddModifier(bpy.types.Operator):
                 # set
                 mod.target = target_obj
             elif len(selected_objects) > 2:
-                self.report({'ERROR'}, f"Too Many Objects")
+                self.Error(f"Too Many Objects")
                 return {'CANCELLED'}
             elif len(selected_objects) < 2:
-                self.report({'ERROR'}, f"Too Few Objects")
+                self.Error(f"Too Few Objects")
                 return {'CANCELLED'}
             
             # set modifier
@@ -267,7 +268,7 @@ class F_OT_AddModifier(bpy.types.Operator):
         else:
             for obj in selected_objects:
                 obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
-        self.report({'INFO'}, f"{len(selected_objects)} Objects Added <{self.modifier_type}>")
+        self.Log(f"{len(selected_objects)} Objects Added <{self.modifier_type}>")
         
         return {'FINISHED'}
 
@@ -357,9 +358,9 @@ class F_OT_AddModifier(bpy.types.Operator):
         # return wm.invoke_props_popup(self, event)
         return self.execute(context)
 
-class F_OT_ClearAllModifier(bpy.types.Operator):
+class F_OT_ClearAllModifier(Operator):
     """Clear All Modifiers"""
-    bl_idname = "object.fastops_clear_all_modifier"
+    bl_idname = "object.f_clear_all_modifier"
     bl_label = "Clear All Modifiers"
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context: Context):
@@ -373,7 +374,7 @@ class F_OT_ClearAllModifier(bpy.types.Operator):
         # set shade flat
         bpy.ops.object.shade_flat()
 
-        self.report({'INFO'}, f"{len(selected_objects)} Objects Cleared; Modifiers Total:{len(obj.modifiers)}")
+        self.Log(f"{len(selected_objects)} Objects Cleared; Modifiers Total:{len(obj.modifiers)}")
         return {'FINISHED'}
 _cls=[
     F_OT_AddModifier,

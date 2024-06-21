@@ -3,7 +3,7 @@ import os
 import importlib
 from bpy.types import Context
 from .. import utility
-from ..utility import matching
+from ..utility.base_class import Operator
 
 # import submod
 correct_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,16 +19,22 @@ for mod in submod:
     _modcls += mod._cls
 
 # test operator
-class F_OT_TEST(bpy.types.Operator):
+
+class F_OT_TEST(Operator):
     """"Test Operator"""
-    bl_idname = "object.fastops_test"
+    bl_idname = "object.f_test"
     bl_label = "Test"
     bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context: Context):
-        lis=matching.match_obj(bpy.data.objects, "MESH")
-        self.report({"INFO"}, f"{lis}")
-        return {'FINISHED'}
+        i = 0
+        self.Log(f"{i} objects finished")
+        self.Warning("Warning")
+        self.Error("Error")
     
+        return {'FINISHED'}
+
+
 _modcls+=[F_OT_TEST]
 
 # Register Functin
