@@ -82,7 +82,7 @@ class F_OT_SetMeshName(Operator):
 bpy.types.Scene.FastOpsObjectBatchRename_find = bpy.props.StringProperty(name= "F_Rename_Object Find", default= "")
 bpy.types.Scene.FastOpsObjectBatchRename_replace = bpy.props.StringProperty(name= "F_Rename_Object Replace", default= "")
 
-class F_OT_FindAndReplace(bpy.types.Operator):
+class F_OT_FindAndReplace(Operator):
     """Replace Object Name"""
     bl_idname = "object.f_find_and_replace"
     bl_label = "Find And Replace Object Name"
@@ -93,12 +93,11 @@ class F_OT_FindAndReplace(bpy.types.Operator):
 
         count=0
         # 1.traversal
-        for index, obj in enumerate(context.selected_objects):
+        for obj in context.selected_objects:
             # 2.edit name
-            obj.name = re.sub(pattern, replace, obj.name)
-            # old
-            # obj.name = obj.name.replace(pattern, replace)
-            count=index
+            if pattern in obj.name:
+                obj.name = re.sub(pattern, replace, obj.name)
+                count+=1
             ...
         self.Log(f"{count}object name changed")
         ...
@@ -233,7 +232,7 @@ class F_OT_RenameByActiveMaterialName(Operator):
 
 bpy.types.Scene.F_EditMaterialNameInSelectedObjects_namePrefix = bpy.props.StringProperty(name="F_Rename_Material Prefix", default="")
 
-class F_OT_EditMaterialNameInSelectedObjects(bpy.types.Operator):
+class F_OT_EditMaterialNameInSelectedObjects(Operator):
     """Edit Material Name In Selected Objects"""
     bl_idname = "object.f_edit_material_name_in_selected_objects"
     bl_label = "Edit Material Name In Selected Objects"

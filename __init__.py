@@ -29,9 +29,9 @@ def register():
     keymap.km_handle.register()
 
     # No error
-    P(31, "------------------")
-    P(31, "| So Far So Good |")
-    P(31, "------------------")
+    P(31, "-------")
+    P(31, "| End |")
+    P(31, "-------")
     
 def unregister():
     # UnRegister Operator

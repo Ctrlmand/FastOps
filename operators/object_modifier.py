@@ -1,10 +1,11 @@
 from typing import Any
 import bpy
-from bpy.types import Context
-from ..utility.debug import P
 import math
 from mathutils import Vector
+from bpy.types import Context
 from ..utility.base_class import Operator
+from ..utility.debug import P
+from ..utility import props
 
 class F_OT_AddModifier(Operator):
     """Batch Add Modifier To Selected Objects"""
@@ -13,20 +14,7 @@ class F_OT_AddModifier(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     # Variables
     # enum property
-    modifier_type: bpy.props.EnumProperty( # type: ignore
-        name = "Modifier Type",
-        description = "Modifier Type",
-        items =(
-            ('MIRROR', 'Mirror', ''),
-            ('SOLIDIFY', 'Solidify', ''),
-            ('BEVEL', 'Bevel', ''),
-            ('WEIGHTED_NORMAL', 'Weighted Normal', ''),
-            ('ARRAY', 'Array', ''),
-            ('WELD', 'Weld', ''),
-            ('SHRINKWRAP', 'Shrinkwrap', '')
-        ),
-        default = 'MIRROR',
-    )
+    modifier_type: props.get_modifier_enum() # type: ignore
 
     # Bevel
     bevel_affect: bpy.props.EnumProperty( # type: ignore
@@ -376,7 +364,57 @@ class F_OT_ClearAllModifier(Operator):
 
         self.Log(f"{len(selected_objects)} Objects Cleared; Modifiers Total:{len(obj.modifiers)}")
         return {'FINISHED'}
+
+class F_OT_RemoveModifier(Operator):
+    bl_idname = "object.f_remove_modifier"
+    bl_label = "Batch Remove Target Modifier"
+    bl_option = {'REGISTER', 'UNDO'}
+    
+    use_input_key: bpy.props.BoolProperty(name="Input Key", default=False) # type: ignore
+    modifier_key: props.get_modifier_enum() # type: ignore
+    input_modifier_name: bpy.props.StringProperty(name="Modifier Name", default="") # type: ignore
+    
+
+    def execute(self, context):
+        C = context
+        modifier_key = self.modifier_key.title()
+        ignore_list=[]
+        
+        for obj in C.selected_objects:
+            if modifier_key in obj.modifiers.keys():
+                P(f"{modifier_key} in {obj.name}")
+                modifier = C.object.modifiers.get(modifier_key)
+                C.object.modifiers.remove(modifier)
+
+            else:
+                ignore_list.append(obj.name)
+                continue
+        
+        if len(ignore_list) == 0:
+            self.Log("Sucess")
+        else:
+            self.Warning(f"{len(ignore_list)} objects not have modifier >>{modifier_key}<<")
+            P(33, f"{ignore_list}")
+        return {"FINISHED"}
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+
+        col.use_property_split = True
+
+        col.prop(self, "use_input_key", text="Custom Input")
+        if self.use_input_key:
+            col.prop(self, "input_modifier_name", text="Modifier Name")
+        else:
+            col.prop(self, "modifier_key", text="Modifier")
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
 _cls=[
     F_OT_AddModifier,
     F_OT_ClearAllModifier,
+    F_OT_RemoveModifier,
 ]

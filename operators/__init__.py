@@ -4,6 +4,10 @@ import importlib
 from bpy.types import Context
 from .. import utility
 from ..utility.base_class import Operator
+from ..utility.debug import P
+from ..utility import props
+
+
 
 # import submod
 correct_dir = os.path.dirname(os.path.abspath(__file__))
@@ -20,18 +24,22 @@ for mod in submod:
 
 # test operator
 
+
 class F_OT_TEST(Operator):
     """"Test Operator"""
     bl_idname = "object.f_test"
     bl_label = "Test"
     bl_options = {'REGISTER', 'UNDO'}
 
+    info: props.get_modifier_enum() # type: ignore
+
     def execute(self, context: Context):
-        i = 0
-        self.Log(f"{i} objects finished")
-        self.Warning("Warning")
-        self.Error("Error")
-    
+        # i = 0
+        # self.Log(f"{i} objects finished")
+        # self.Warning("Warning")
+        # self.Error("Error")
+
+        P(31, self.info)
         return {'FINISHED'}
 
 
