@@ -3,7 +3,7 @@ import bpy
 import re
 from bpy.types import Context
 from typing import Union
-from ..utility.debug import P
+from ..utility.debug import P, Log
 from ..utility.base_class import Operator
 
 # scene property
@@ -104,17 +104,23 @@ class F_OT_SelectObjectByMaterial(Operator):
         last_obj=None
 
         bpy.ops.object.select_all(action='DESELECT')
+
         for obj in obj_data:
             mat_index = obj.material_slots.find(self.material_name)
             if mat_index == -1:
+                Log(f"{obj.name} Not In View Layer")
                 continue
             else:
+                Log(f"{obj.name}:Material Exist")
                 last_obj=obj
-                if obj.name in context.view_layer:
+                if context.view_layer.objects.get(obj.name) != None:
+                    Log(f"{obj.name} In View Layer")
                     obj.select_set(True)
                     count+=1
                 ...
         context.view_layer.objects.active = last_obj
+
+        # report
         if count >0:
             self.Log(f"{count} Selected")
         else:

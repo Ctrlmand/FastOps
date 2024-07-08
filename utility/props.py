@@ -1,8 +1,8 @@
 # modifiers.py
 
-from bpy.props import EnumProperty, StringProperty
+from bpy.props import EnumProperty
 
-def get_modifier_enum():
+def get_modifier_enum() -> EnumProperty:
     return EnumProperty(
         name="Modifier Type",
         description="Modifier Type",

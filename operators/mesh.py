@@ -70,6 +70,9 @@ class F_OT_BatchAddUVLayer(Operator):
         uv_name = context.scene.F_MeshBatchAddUVLayer_name
         
         for obj in C.selected_objects:
+            if obj.data.uv_layers.get(uv_name) != None:
+                 continue
+
             uvlayer_index = len(obj.data.uv_layers.keys())
             obj.data.uv_layers.new(name = uv_name)
             obj.data.uv_layers.active_index = uvlayer_index
