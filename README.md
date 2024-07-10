@@ -1,4 +1,4 @@
-# FASTOPS #001.5
+# FASTOPS #2.0
 Addon for Blender.
 
 ---
@@ -41,6 +41,7 @@ Addon for Blender.
 * __Flood Empty Material__ : Set empty material slot to default material.
 * __Select By Material__ : Select object by active material.
 * __Rename By Active Material__ : Find object by active material and rename them by material name.
+* __Select By Image Texture__ : Find object and material by image name.
 ---
 ### Shader Editor > SideBar > FASTOPS
 * __SetColorSpace__ : Quick set common color space.

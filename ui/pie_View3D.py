@@ -1,5 +1,5 @@
 import bpy
-from ..operators import object_modifier, object_material, object_rename, object_select
+from ..operators import object_modifier, object_material, object_rename, object_select, node_mat
 
 class VIEW3D_MT_ModifierPieMenu(bpy.types.Menu):
     """Object Option Pie Menu"""
@@ -44,7 +44,7 @@ class VIEW3D_MT_MaterialPieMenu(bpy.types.Menu):
         layout = self.layout
 
         pie = layout.menu_pie()
-        ##Left
+        ## Left
         pie.operator(object_material.F_OT_SetNoneMaterial.bl_idname, text="Flood Empty Material", icon="SHADING_RENDERED")
         
         ## Right
@@ -53,8 +53,11 @@ class VIEW3D_MT_MaterialPieMenu(bpy.types.Menu):
         ## Down
         pie.operator(object_rename.F_OT_SetMeshName.bl_idname, text="Set Mesh Name", icon="MESH_DATA")
 
-        ## up
+        ## Up
         pie.operator(object_select.F_OT_SelectObjectByMaterial.bl_idname, text="Select By Material", icon="MATERIAL_DATA")
+
+        ## Left Up
+        pie.operator(node_mat.F_OT_FindMaterialByTextureNode.bl_idname, text="Select By Image", icon="OUTLINER_OB_IMAGE")
 _cls=[
     VIEW3D_MT_ModifierPieMenu,
     VIEW3D_MT_MaterialPieMenu,
