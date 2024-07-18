@@ -17,9 +17,10 @@ class VIEW3D_MT_ModifierPieMenu(bpy.types.Menu):
 
         ## Down
         col = pie.split().box().column()
-        col.operator(object_modifier.F_OT_ClearAllModifier.bl_idname, text="Clear All", icon="TRASH")
-        col.operator(object_select.F_OT_SelectByModifier.bl_idname, text="Select By Modifier", icon="MODIFIER")
-        col.operator(object_modifier.F_OT_RemoveModifier.bl_idname, text="Remove Modifier", icon="X")
+        col.operator(object_modifier.F_OT_AddModifier.bl_idname, text="Add Modifier", icon="ADD").use_manual = True
+        col.operator(object_modifier.F_OT_RemoveModifier.bl_idname, text="Remove Modifier", icon="REMOVE")
+        col.operator(object_select.F_OT_SelectByModifier.bl_idname, text="Select By Modifier", icon="RESTRICT_SELECT_OFF")
+        col.operator(object_modifier.F_OT_ClearAllModifier.bl_idname, text="Clear Modifier", icon="TRASH")
 
         ## Up
         pie.operator(object_modifier.F_OT_AddModifier.bl_idname, text="Solidify", icon="MOD_SOLIDIFY").modifier_type = 'SOLIDIFY'

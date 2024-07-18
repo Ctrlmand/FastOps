@@ -1,7 +1,11 @@
-# FASTOPS #2.0
+# FASTOPS 
 Addon for Blender.
 
 ---
+
+###### #20240718
+###### _now can add modifier by choose a type manually_
+
 ### View 3D > Sidebar > FASTOPS
 #### * Rename
 * __Name__ : Name prefix

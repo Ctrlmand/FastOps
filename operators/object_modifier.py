@@ -58,14 +58,14 @@ class F_OT_AddModifier(Operator):
     bevel_use_clamp_overlap: bpy.props.BoolProperty(name= "Use Clamp Overlap", default=False) # type: ignore
 
     # Mirror
-    mirror_use_x: bpy.props.BoolProperty(name="Mirror Use X", default=False) # type: ignore
+    mirror_use_x: bpy.props.BoolProperty(name="Mirror Use X", default=True) # type: ignore
     mirror_use_y: bpy.props.BoolProperty(name="Mirror Use Y", default=False) # type: ignore
     mirror_use_z: bpy.props.BoolProperty(name="Mirror Use Z", default=False) # type: ignore
 
-    mirror_use_clip: bpy.props.BoolProperty(name="Mirror Use Clip", default=False) # type: ignore
+    mirror_use_clip: bpy.props.BoolProperty(name="Mirror Use Clip", default=True) # type: ignore
 
+    mirror_offset_u: bpy.props.FloatProperty(name="Mirror Offset U", default=1.0, min=0.0, max=1.0) # type: ignore
     mirror_offset_v: bpy.props.FloatProperty(name="Mirror Offset V", default=0.0, min=0.0, max=1.0) # type: ignore
-    mirror_offset_u: bpy.props.FloatProperty(name="Mirror Offset U", default=0.0, min=0.0, max=1.0) # type: ignore
 
     # Solidify
     solidify_thickness: bpy.props.FloatProperty(name="Solidify Thickness", default=0.01, subtype='DISTANCE') # type: ignore
@@ -95,6 +95,9 @@ class F_OT_AddModifier(Operator):
     array_along_single_axis: bpy.props.BoolProperty(name="Along Single Axis", default=True) # type: ignore
     array_use_object_offset: bpy.props.BoolProperty(name="Use Object Offset", default=False) # type: ignore
 
+    # Triangulate
+    triangulate_keep_custom_normals: bpy.props.BoolProperty(name="Keep Custom Normals", default=True) # type: ignore
+    triangulate_min_vertices: bpy.props.IntProperty(name="Min Vertices", default=4) # type: ignore
 
     array_set_axis: bpy.props.EnumProperty( # type: ignore
         name = "Array Set Axis",
@@ -107,6 +110,9 @@ class F_OT_AddModifier(Operator):
         ),
     )
 
+    # Manual
+    use_manual: bpy.props.BoolProperty(name="Use Manual", default=False) # type: ignore
+    
     def execute(self, context: bpy.types.Context):
         # alias
         active_object = bpy.context.object
@@ -120,23 +126,19 @@ class F_OT_AddModifier(Operator):
                 obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
 
                 mod=obj.modifiers[-1]
-                # Bevel
-                if self.modifier_type == 'BEVEL':
-                    
-                    mod.affect = self.bevel_affect
-                    mod.width = self.bevel_width
-                    mod.segments = self.bevel_segments
+                
+                mod.affect = self.bevel_affect
+                mod.width = self.bevel_width
+                mod.segments = self.bevel_segments
 
-                    mod.limit_method = self.bevel_limit_method
-                    # if Angle
-                    if self.bevel_limit_method == 'ANGLE':
-                        mod.angle_limit = self.bevel_angle_limit
+                mod.limit_method = self.bevel_limit_method
+                # if Angle
+                if self.bevel_limit_method == 'ANGLE':
+                    mod.angle_limit = self.bevel_angle_limit
 
-                    mod.profile = self.bevel_profile
+                mod.profile = self.bevel_profile
 
-                    mod.use_clamp_overlap = self.bevel_use_clamp_overlap
-                # Mirror
-
+                mod.use_clamp_overlap = self.bevel_use_clamp_overlap
         # Mirror
         elif self.modifier_type == 'MIRROR':
             # add modifier
@@ -172,7 +174,6 @@ class F_OT_AddModifier(Operator):
 
 
             ...
-        
         # Solidify
         elif self.modifier_type == 'SOLIDIFY':
             active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
@@ -183,7 +184,6 @@ class F_OT_AddModifier(Operator):
             mod.use_even_offset = self.solidify_use_even_offset
             mod.use_rim = self.solidify_use_rim
             mod.use_rim_only = self.solidify_use_rim_only
-            
         # Shrinkwrap
         elif self.modifier_type == 'SHRINKWRAP':
             # add modifier
@@ -210,7 +210,6 @@ class F_OT_AddModifier(Operator):
             mod.wrap_method = self.shrinkwarp_wrap_method
             mod.use_negative_direction = self.shrinkwarp_use_negative_direction
             mod.offset = self.shrinkwarp_offset
-
         # Array
         elif self.modifier_type == 'ARRAY':
             active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
@@ -251,13 +250,23 @@ class F_OT_AddModifier(Operator):
             mod.relative_offset_displace[0] = self.array_relative_offset_displace[0]
             mod.relative_offset_displace[1] = self.array_relative_offset_displace[1]
             mod.relative_offset_displace[2] = self.array_relative_offset_displace[2]
+        # Triangulate
+        elif self.modifier_type == 'TRIANGULATE':
+            for obj in selected_objects:
+                obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+                mod = context.object.modifiers[-1]
 
+                mod.keep_custom_normals = self.triangulate_keep_custom_normals
+                mod.min_vertices = self.triangulate_min_vertices
         # Basic
         else:
             for obj in selected_objects:
                 obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
-        self.Log(f"{len(selected_objects)} Objects Added <{self.modifier_type}>")
         
+        # set use_manual as false when finished
+        if self.use_manual:
+            self.use_manual = False
+        self.Log(f"{len(selected_objects)} Objects Added <{self.modifier_type}>")
         return {'FINISHED'}
 
     def draw(self, context: Context):
@@ -267,6 +276,7 @@ class F_OT_AddModifier(Operator):
         # Bevel
         if self.modifier_type == 'BEVEL':
             col.use_property_split = True
+            self.use_manual_type(self.use_manual,col)
 
             row = col.row()
             row.prop(self, 'bevel_affect', expand=True)
@@ -280,16 +290,15 @@ class F_OT_AddModifier(Operator):
             if self.bevel_limit_method == 'ANGLE':
                 col.prop(self, 'bevel_angle_limit', text="Angle")
 
-
             col.prop(self, 'bevel_profile', text="Profile", slider=True)
 
             col.prop(self, 'bevel_use_clamp_overlap',text="Clamp Overlap")
-
         # Mirror
         if self.modifier_type == 'MIRROR':
             col.use_property_split = True
-            row = col.row()
+            self.use_manual_type(self.use_manual,col)
 
+            row = col.row()
             row = col.row(align=True, heading="Axis")
 
             row.prop(self, 'mirror_use_x', text="X", toggle=True)
@@ -303,6 +312,7 @@ class F_OT_AddModifier(Operator):
         # Solidify
         if self.modifier_type == 'SOLIDIFY':
             col.use_property_split = True
+            self.use_manual_type(self.use_manual,col)
 
             col.prop(self, 'solidify_thickness')
             col.prop(self, 'solidify_offset', slider=True)
@@ -314,16 +324,19 @@ class F_OT_AddModifier(Operator):
             ...
         # Shrinkwrap
         if self.modifier_type == 'SHRINKWRAP':
+            self.use_manual_type(self.use_manual,col)
+
             col.use_property_split = True
 
             col.prop(self, 'shrinkwarp_wrap_method')
             if self.shrinkwarp_wrap_method == 'PROJECT':
                 col.prop(self, 'shrinkwarp_use_negative_direction')
             col.prop(self, 'shrinkwarp_offset')
-        
         # Array
         if self.modifier_type == 'ARRAY':
             col.use_property_split = True
+
+            self.use_manual_type(self.use_manual,col)
 
             row = col.row()
             row.prop(self, 'array_along_single_axis', text="Along Single Axis")
@@ -336,15 +349,32 @@ class F_OT_AddModifier(Operator):
 
             row = col.row(heading="Object Offset")
             row.prop(self, 'array_use_object_offset', text="Use Object Offset", toggle=True)
+        # Triangulate
+        if self.modifier_type == 'TRIANGULATE':
+            col.use_property_split = True
+            self.use_manual_type(self.use_manual,col)
+
+            col.prop(self, 'triangulate_keep_custom_normals', text="Keep Custom Normals")
+            col.prop(self, 'triangulate_min_vertices', text="Min Vertices")
 
         # Not Draw
         if self.modifier_type == 'WELD' or self.modifier_type == 'WEIGHTED_NORMAL':
+            col.use_property_split = True
+
+            self.use_manual_type(self.use_manual,col)
+
             col.label(text="Done!")
 
     def invoke(self, context: Context, event):
         wm = context.window_manager
         # return wm.invoke_props_popup(self, event)
-        return self.execute(context)
+        if self.use_manual:
+            return wm.invoke_props_dialog(self)
+        else:
+            return self.execute(context)
+    def use_manual_type(self, is_true: bool, layout)-> None:
+        if is_true:
+            layout.prop(self, 'modifier_type', text="Modifier Type")
 
 class F_OT_ClearAllModifier(Operator):
     """Clear All Modifiers"""

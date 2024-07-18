@@ -13,7 +13,9 @@ def get_modifier_enum() -> EnumProperty:
             ('WEIGHTED_NORMAL', 'Weighted Normal', ''),
             ('ARRAY', 'Array', ''),
             ('WELD', 'Weld', ''),
-            ('SHRINKWRAP', 'Shrinkwrap', '')
+            ('SHRINKWRAP', 'Shrinkwrap', ''),
+            ('TRIANGULATE', 'Triangulate', ''),
+
         ],
         default='MIRROR'
     )
