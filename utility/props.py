@@ -15,6 +15,8 @@ def get_modifier_enum() -> EnumProperty:
             ('WELD', 'Weld', ''),
             ('SHRINKWRAP', 'Shrinkwrap', ''),
             ('TRIANGULATE', 'Triangulate', ''),
+            ('SIMPLE_DEFORM', 'Simple Deform', ''),
+
 
         ],
         default='MIRROR'

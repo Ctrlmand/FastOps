@@ -96,7 +96,6 @@ class F_OT_AddModifier(Operator):
     array_use_object_offset: bpy.props.BoolProperty(name="Use Object Offset", default=False) # type: ignore
 
     # Triangulate
-    triangulate_keep_custom_normals: bpy.props.BoolProperty(name="Keep Custom Normals", default=True) # type: ignore
     triangulate_min_vertices: bpy.props.IntProperty(name="Min Vertices", default=4) # type: ignore
 
     array_set_axis: bpy.props.EnumProperty( # type: ignore
@@ -118,151 +117,156 @@ class F_OT_AddModifier(Operator):
         active_object = bpy.context.object
         selected_objects = bpy.context.selected_objects
 
-        # Bevel
-        if self.modifier_type == 'BEVEL':
-           # interation
-           for obj in selected_objects:
-                context.view_layer.objects.active = obj
-                obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
 
-                mod=obj.modifiers[-1]
+        match self.modifier_type:
+            # Bevel
+            case 'BEVEL':
+                # interation
+                for obj in selected_objects:
+                        context.view_layer.objects.active = obj
+                        obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+
+                        mod=obj.modifiers[-1]
+                        
+                        mod.affect = self.bevel_affect
+                        mod.width = self.bevel_width
+                        mod.segments = self.bevel_segments
+
+                        mod.limit_method = self.bevel_limit_method
+                        # if Angle
+                        if self.bevel_limit_method == 'ANGLE':
+                            mod.angle_limit = self.bevel_angle_limit
+
+                        mod.profile = self.bevel_profile
+
+                        mod.use_clamp_overlap = self.bevel_use_clamp_overlap
+            # Mirror
+            case 'MIRROR':
+
+                # add modifier
+                active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+
+                mod = context.object.modifiers[-1]
                 
-                mod.affect = self.bevel_affect
-                mod.width = self.bevel_width
-                mod.segments = self.bevel_segments
-
-                mod.limit_method = self.bevel_limit_method
-                # if Angle
-                if self.bevel_limit_method == 'ANGLE':
-                    mod.angle_limit = self.bevel_angle_limit
-
-                mod.profile = self.bevel_profile
-
-                mod.use_clamp_overlap = self.bevel_use_clamp_overlap
-        # Mirror
-        elif self.modifier_type == 'MIRROR':
-            # add modifier
-            active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
-
-            mod = context.object.modifiers[-1]
-            
-            # is tow objects selected? 
-            if len(selected_objects) == 2:
-                # mirror object
-                tmp_list = selected_objects
-                tmp_list.remove(active_object)
-                mirror_obj = tmp_list[0]
-                # debug
-                P(31, f"active object:{active_object.name}")
-                P(31, f"another object:{mirror_obj.name}")
-                # set
-                mod.mirror_object = mirror_obj
+                # is tow objects selected? 
+                if len(selected_objects) == 2:
+                    # mirror object
+                    tmp_list = selected_objects
+                    tmp_list.remove(active_object)
+                    mirror_obj = tmp_list[0]
+                    # debug
+                    P(31, f"active object:{active_object.name}")
+                    P(31, f"another object:{mirror_obj.name}")
+                    # set
+                    mod.mirror_object = mirror_obj
+                    
+                elif len(selected_objects) > 2 or len(selected_objects) < 1:
+                    self.Error(f"Please Select 1 or 2 Objects")
+                    return {'CANCELLED'}
                 
-            elif len(selected_objects) > 2 or len(selected_objects) < 1:
-                self.Error(f"Please Select 1 or 2 Objects")
-                return {'CANCELLED'}
-            
-            # set modifier
-            mod.use_axis[0] = self.mirror_use_x
-            mod.use_axis[1] = self.mirror_use_y
-            mod.use_axis[2] = self.mirror_use_z
+                # set modifier
+                mod.use_axis[0] = self.mirror_use_x
+                mod.use_axis[1] = self.mirror_use_y
+                mod.use_axis[2] = self.mirror_use_z
 
-            mod.use_clip = self.mirror_use_clip
+                mod.use_clip = self.mirror_use_clip
 
-            mod.offset_u = self.mirror_offset_u
-            mod.offset_v = self.mirror_offset_v
+                mod.offset_u = self.mirror_offset_u
+                mod.offset_v = self.mirror_offset_v
+            # Solidify
+            case 'SOLIDIFY':
+                if self.modifier_type == 'SOLIDIFY':
+                    active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+                    mod = context.object.modifiers[-1]
 
+                    mod.thickness = self.solidify_thickness
+                    mod.offset = self.solidify_offset
+                    mod.use_even_offset = self.solidify_use_even_offset
+                    mod.use_rim = self.solidify_use_rim
+                    mod.use_rim_only = self.solidify_use_rim_only
+            # Shrinkwrap
+            case 'SHRINKWRAP':
+                # add modifier
+                active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
 
-            ...
-        # Solidify
-        elif self.modifier_type == 'SOLIDIFY':
-            active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
-            mod = context.object.modifiers[-1]
+                mod = context.object.modifiers[-1]
+                
+                # is tow objects selected? 
+                if len(selected_objects) == 2:
+                    # target object
+                    tmp_list = selected_objects
+                    tmp_list.remove(active_object)
+                    target_obj = tmp_list[0]
+                    # set
+                    mod.target = target_obj
+                elif len(selected_objects) > 2:
+                    self.Error(f"Too Many Objects")
+                    return {'CANCELLED'}
+                elif len(selected_objects) < 2:
+                    self.Error(f"Too Few Objects")
+                    return {'CANCELLED'}
+                
+                # set modifier
+                mod.wrap_method = self.shrinkwarp_wrap_method
+                mod.use_negative_direction = self.shrinkwarp_use_negative_direction
+                mod.offset = self.shrinkwarp_offset
+            # Array
+            case 'ARRAY':
+                active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+                mod = mod = context.object.modifiers[-1]
 
-            mod.thickness = self.solidify_thickness
-            mod.offset = self.solidify_offset
-            mod.use_even_offset = self.solidify_use_even_offset
-            mod.use_rim = self.solidify_use_rim
-            mod.use_rim_only = self.solidify_use_rim_only
-        # Shrinkwrap
-        elif self.modifier_type == 'SHRINKWRAP':
-            # add modifier
-            active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+                # set axis
+                if self.array_along_single_axis:
+                    match self.array_set_axis:
+                        case 'X':
+                            self.array_relative_offset_displace = (2.0, 0.0, 0.0)
+                        case 'Y':
+                            self.array_relative_offset_displace = (0.0, 2.0, 0.0)
+                        case 'Z':
+                            self.array_relative_offset_displace = (0.0, 0.0, 2.0)
+                    ...
 
-            mod = context.object.modifiers[-1]
-            
-            # is tow objects selected? 
-            if len(selected_objects) == 2:
-                # target object
-                tmp_list = selected_objects
-                tmp_list.remove(active_object)
-                target_obj = tmp_list[0]
-                # set
-                mod.target = target_obj
-            elif len(selected_objects) > 2:
-                self.Error(f"Too Many Objects")
-                return {'CANCELLED'}
-            elif len(selected_objects) < 2:
-                self.Error(f"Too Few Objects")
-                return {'CANCELLED'}
-            
-            # set modifier
-            mod.wrap_method = self.shrinkwarp_wrap_method
-            mod.use_negative_direction = self.shrinkwarp_use_negative_direction
-            mod.offset = self.shrinkwarp_offset
-        # Array
-        elif self.modifier_type == 'ARRAY':
-            active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
-            mod = mod = context.object.modifiers[-1]
+                # use object offset
+                if self.array_use_object_offset:
+                    empty_name = f'{context.object.name}_ObjectOffset'
 
-            # set axis
-            if self.array_along_single_axis:
-                match self.array_set_axis:
-                    case 'X':
-                        self.array_relative_offset_displace = (2.0, 0.0, 0.0)
-                    case 'Y':
-                        self.array_relative_offset_displace = (0.0, 2.0, 0.0)
-                    case 'Z':
-                        self.array_relative_offset_displace = (0.0, 0.0, 2.0)
+                    if not empty_name in bpy.data.objects:
+                        # set mode
+                        mod.use_relative_offset = False
+                        mod.use_object_offset = True
+                        mod.count = 3
+
+                        # create empty
+                        bpy.data.objects.new(empty_name, None)
+                        context.scene.collection.objects.link(bpy.data.objects[empty_name])
+                        bpy.data.objects[empty_name].location = context.object.location + Vector((0, 0, 2))
+                        mod.offset_object = bpy.data.objects[empty_name]
+
+                        bpy.ops.object.select_all(action='DESELECT')
+                        context.view_layer.objects.active = bpy.data.objects[empty_name]
+                        bpy.data.objects[empty_name].select_set(True)
+
+                # set modifier value
+                mod.relative_offset_displace[0] = self.array_relative_offset_displace[0]
+                mod.relative_offset_displace[1] = self.array_relative_offset_displace[1]
+                mod.relative_offset_displace[2] = self.array_relative_offset_displace[2]
+            # Triangulate
+            case 'TRIANGULATE':
+                for obj in selected_objects:
+                    obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+                    mod = obj.modifiers[-1]
+                    self.Log(mod.name)
+                    mod.min_vertices = self.triangulate_min_vertices
+            # SimpleDeform
+            case 'SIMPLE_DEFORM':
                 ...
 
-            # use object offset
-            if self.array_use_object_offset:
-                empty_name = f'{context.object.name}_ObjectOffset'
-
-                if not empty_name in bpy.data.objects:
-                    # set mode
-                    mod.use_relative_offset = False
-                    mod.use_object_offset = True
-                    mod.count = 3
-
-                    # create empty
-                    bpy.data.objects.new(empty_name, None)
-                    context.scene.collection.objects.link(bpy.data.objects[empty_name])
-                    bpy.data.objects[empty_name].location = context.object.location + Vector((0, 0, 2))
-                    mod.offset_object = bpy.data.objects[empty_name]
-
-                    bpy.ops.object.select_all(action='DESELECT')
-                    context.view_layer.objects.active = bpy.data.objects[empty_name]
-                    bpy.data.objects[empty_name].select_set(True)
-
-            # set modifier value
-            mod.relative_offset_displace[0] = self.array_relative_offset_displace[0]
-            mod.relative_offset_displace[1] = self.array_relative_offset_displace[1]
-            mod.relative_offset_displace[2] = self.array_relative_offset_displace[2]
-        # Triangulate
-        elif self.modifier_type == 'TRIANGULATE':
-            for obj in selected_objects:
-                obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
-                mod = context.object.modifiers[-1]
-
-                mod.keep_custom_normals = self.triangulate_keep_custom_normals
-                mod.min_vertices = self.triangulate_min_vertices
-        # Basic
-        else:
-            for obj in selected_objects:
-                obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
-        
+            
+            # Basic
+            case _:
+                for obj in selected_objects:
+                    obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+            
         # set use_manual as false when finished
         if self.use_manual:
             self.use_manual = False
@@ -273,97 +277,103 @@ class F_OT_AddModifier(Operator):
         layout = self.layout
         col=layout.column()
 
-        # Bevel
-        if self.modifier_type == 'BEVEL':
-            col.use_property_split = True
-            self.use_manual_type(self.use_manual,col)
 
-            row = col.row()
-            row.prop(self, 'bevel_affect', expand=True)
-            col.prop(self, 'bevel_offset_type', text="Offset Type")
-            col.prop(self, 'bevel_width', text="Amount")
-            col.prop(self, 'bevel_segments', text="Segments")
+        match self.modifier_type:
+            # Bevel
+            case 'BEVEL':
+                col.use_property_split = True
+                self.use_manual_type(self.use_manual,col)
 
-            col.split()
-
-            col.prop(self, 'bevel_limit_method', text="Limit Method")
-            if self.bevel_limit_method == 'ANGLE':
-                col.prop(self, 'bevel_angle_limit', text="Angle")
-
-            col.prop(self, 'bevel_profile', text="Profile", slider=True)
-
-            col.prop(self, 'bevel_use_clamp_overlap',text="Clamp Overlap")
-        # Mirror
-        if self.modifier_type == 'MIRROR':
-            col.use_property_split = True
-            self.use_manual_type(self.use_manual,col)
-
-            row = col.row()
-            row = col.row(align=True, heading="Axis")
-
-            row.prop(self, 'mirror_use_x', text="X", toggle=True)
-            row.prop(self, 'mirror_use_y', text="Y", toggle=True)
-            row.prop(self, 'mirror_use_z', text="Z", toggle=True)
-
-            col.prop(self, 'mirror_use_clip', text="Use Clipping", toggle=True)
-
-            col.prop(self, 'mirror_offset_u', text="Offset U", slider=True)
-            col.prop(self, 'mirror_offset_v', text="Offset V", slider=True)
-        # Solidify
-        if self.modifier_type == 'SOLIDIFY':
-            col.use_property_split = True
-            self.use_manual_type(self.use_manual,col)
-
-            col.prop(self, 'solidify_thickness')
-            col.prop(self, 'solidify_offset', slider=True)
-            col.prop(self, 'solidify_use_even_offset')
-            col.prop(self, 'solidify_use_rim')
-            if self.solidify_use_rim:
-                col.prop(self, 'solidify_use_rim_only')
-
-            ...
-        # Shrinkwrap
-        if self.modifier_type == 'SHRINKWRAP':
-            self.use_manual_type(self.use_manual,col)
-
-            col.use_property_split = True
-
-            col.prop(self, 'shrinkwarp_wrap_method')
-            if self.shrinkwarp_wrap_method == 'PROJECT':
-                col.prop(self, 'shrinkwarp_use_negative_direction')
-            col.prop(self, 'shrinkwarp_offset')
-        # Array
-        if self.modifier_type == 'ARRAY':
-            col.use_property_split = True
-
-            self.use_manual_type(self.use_manual,col)
-
-            row = col.row()
-            row.prop(self, 'array_along_single_axis', text="Along Single Axis")
-            if self.array_along_single_axis:
                 row = col.row()
-                row.prop(self, 'array_set_axis', text="Axis", expand=True)
-            else:
-                col.prop(self, 'array_relative_offset_displace', text="Relative Offset")
-            ...
+                row.prop(self, 'bevel_affect', expand=True)
+                col.prop(self, 'bevel_offset_type', text="Offset Type")
+                col.prop(self, 'bevel_width', text="Amount")
+                col.prop(self, 'bevel_segments', text="Segments")
 
-            row = col.row(heading="Object Offset")
-            row.prop(self, 'array_use_object_offset', text="Use Object Offset", toggle=True)
-        # Triangulate
-        if self.modifier_type == 'TRIANGULATE':
-            col.use_property_split = True
-            self.use_manual_type(self.use_manual,col)
+                col.split()
 
-            col.prop(self, 'triangulate_keep_custom_normals', text="Keep Custom Normals")
-            col.prop(self, 'triangulate_min_vertices', text="Min Vertices")
+                col.prop(self, 'bevel_limit_method', text="Limit Method")
+                if self.bevel_limit_method == 'ANGLE':
+                    col.prop(self, 'bevel_angle_limit', text="Angle")
 
-        # Not Draw
-        if self.modifier_type == 'WELD' or self.modifier_type == 'WEIGHTED_NORMAL':
-            col.use_property_split = True
+                col.prop(self, 'bevel_profile', text="Profile", slider=True)
 
-            self.use_manual_type(self.use_manual,col)
+                col.prop(self, 'bevel_use_clamp_overlap',text="Clamp Overlap")
+            # Mirror
+            case 'MIRROR':
+                col.use_property_split = True
+                self.use_manual_type(self.use_manual,col)
 
-            col.label(text="Done!")
+                row = col.row()
+                row = col.row(align=True, heading="Axis")
+
+                row.prop(self, 'mirror_use_x', text="X", toggle=True)
+                row.prop(self, 'mirror_use_y', text="Y", toggle=True)
+                row.prop(self, 'mirror_use_z', text="Z", toggle=True)
+
+                col.prop(self, 'mirror_use_clip', text="Use Clipping", toggle=True)
+
+                col.prop(self, 'mirror_offset_u', text="Offset U", slider=True)
+                col.prop(self, 'mirror_offset_v', text="Offset V", slider=True)
+            # Solidify
+            case 'SOLIDIFY':
+                col.use_property_split = True
+                self.use_manual_type(self.use_manual,col)
+
+                col.prop(self, 'solidify_thickness')
+                col.prop(self, 'solidify_offset', slider=True)
+                col.prop(self, 'solidify_use_even_offset')
+                col.prop(self, 'solidify_use_rim')
+                if self.solidify_use_rim:
+                    col.prop(self, 'solidify_use_rim_only')
+
+                ...
+            # Shrinkwrap
+            case 'SHRINKWRAP':
+                self.use_manual_type(self.use_manual,col)
+
+                col.use_property_split = True
+
+                col.prop(self, 'shrinkwarp_wrap_method')
+                if self.shrinkwarp_wrap_method == 'PROJECT':
+                    col.prop(self, 'shrinkwarp_use_negative_direction')
+                col.prop(self, 'shrinkwarp_offset')
+            # Array
+            case 'ARRAY':
+                col.use_property_split = True
+
+                self.use_manual_type(self.use_manual,col)
+
+                row = col.row()
+                row.prop(self, 'array_along_single_axis', text="Along Single Axis")
+                if self.array_along_single_axis:
+                    row = col.row()
+                    row.prop(self, 'array_set_axis', text="Axis", expand=True)
+                else:
+                    col.prop(self, 'array_relative_offset_displace', text="Relative Offset")
+                ...
+
+                row = col.row(heading="Object Offset")
+                row.prop(self, 'array_use_object_offset', text="Use Object Offset", toggle=True)
+            # Triangulate
+            case 'TRIANGULATE':
+                col.use_property_split = True
+                self.use_manual_type(self.use_manual,col)
+
+                col.prop(self, 'triangulate_min_vertices', text="Min Vertices")
+            # SimpleDeform
+            case 'SIMPLE_DEFORM':
+                col.use_property_split = True
+                col.label(text="SIMPLE_DEFORM!")
+            
+
+            # Basic
+            case _:
+                col.use_property_split = True
+
+                self.use_manual_type(self.use_manual,col)
+
+                col.label(text="Done!")                    
 
     def invoke(self, context: Context, event):
         wm = context.window_manager
