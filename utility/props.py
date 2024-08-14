@@ -17,6 +17,11 @@ def get_modifier_enum() -> EnumProperty:
             ('TRIANGULATE', 'Triangulate', ''),
             ('SIMPLE_DEFORM', 'Simple Deform', ''),
 
+            # OnlyRemoveOperator
+            ('SUBSURF', 'Subsurf', ''),
+            ('SIMPLE_DEFORM', 'SimpleDeform', ''),
+
+
 
         ],
         default='MIRROR'

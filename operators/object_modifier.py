@@ -41,7 +41,7 @@ class F_OT_AddModifier(Operator):
 
     bevel_width: bpy.props.FloatProperty(name = "Bevel Width", default=0.1, min=0.0, max=100.0) # type: ignore
 
-    bevel_segments: bpy.props.IntProperty(name= "Bevel Segments", min=1) # type: ignore
+    bevel_segments: bpy.props.IntProperty(name= "Bevel Segments", min=1, default = 1) # type: ignore
     bevel_limit_method: bpy.props.EnumProperty(# type: ignore
         name = "Bevel Limit Method",
         description = "Bevel Limit Method",
@@ -55,7 +55,7 @@ class F_OT_AddModifier(Operator):
     ) 
     bevel_angle_limit: bpy.props.FloatProperty(name = "Bevel Limit Angle", step=1, default = math.acos(0.0)/3, min = 0.0, max = math.acos(0.0)*2, subtype = 'ANGLE') # type: ignore
     bevel_profile: bpy.props.FloatProperty(name= "Bevel Profile", default=0.5, min=0, max=1) # type: ignore
-    bevel_use_clamp_overlap: bpy.props.BoolProperty(name= "Use Clamp Overlap", default=False) # type: ignore
+    bevel_use_clamp_overlap: bpy.props.BoolProperty(name= "Use Clamp Overlap", default=True) # type: ignore
 
     # Mirror
     mirror_use_x: bpy.props.BoolProperty(name="Mirror Use X", default=True) # type: ignore
@@ -95,6 +95,10 @@ class F_OT_AddModifier(Operator):
     array_along_single_axis: bpy.props.BoolProperty(name="Along Single Axis", default=True) # type: ignore
     array_use_object_offset: bpy.props.BoolProperty(name="Use Object Offset", default=False) # type: ignore
 
+    array_offset_u: bpy.props.FloatProperty(name="Array Offset U", default=1.0, min=0.0, max=1.0) # type: ignore
+    array_offset_v: bpy.props.FloatProperty(name="Array Offset V", default=0.0, min=0.0, max=1.0) # type: ignore
+    
+
     # Triangulate
     triangulate_min_vertices: bpy.props.IntProperty(name="Min Vertices", default=4) # type: ignore
 
@@ -110,7 +114,7 @@ class F_OT_AddModifier(Operator):
     )
 
     # Manual
-    use_manual: bpy.props.BoolProperty(name="Use Manual", default=False) # type: ignore
+    use_manual_input: bpy.props.BoolProperty(name="Use Manual Input", default=False) # type: ignore
     
     def execute(self, context: bpy.types.Context):
         # alias
@@ -213,7 +217,7 @@ class F_OT_AddModifier(Operator):
             # Array
             case 'ARRAY':
                 active_object.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
-                mod = mod = context.object.modifiers[-1]
+                mod = context.object.modifiers[-1]
 
                 # set axis
                 if self.array_along_single_axis:
@@ -250,6 +254,11 @@ class F_OT_AddModifier(Operator):
                 mod.relative_offset_displace[0] = self.array_relative_offset_displace[0]
                 mod.relative_offset_displace[1] = self.array_relative_offset_displace[1]
                 mod.relative_offset_displace[2] = self.array_relative_offset_displace[2]
+
+                # set uv offset
+                mod.offset_u = self.array_offset_u
+                mod.offset_v = self.array_offset_v
+
             # Triangulate
             case 'TRIANGULATE':
                 for obj in selected_objects:
@@ -268,8 +277,8 @@ class F_OT_AddModifier(Operator):
                     obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
             
         # set use_manual as false when finished
-        if self.use_manual:
-            self.use_manual = False
+        if self.use_manual_input:
+            self.use_manual_input = False
         self.Log(f"{len(selected_objects)} Objects Added <{self.modifier_type}>")
         return {'FINISHED'}
 
@@ -282,7 +291,7 @@ class F_OT_AddModifier(Operator):
             # Bevel
             case 'BEVEL':
                 col.use_property_split = True
-                self.use_manual_type(self.use_manual,col)
+                self.use_manual_type(self.use_manual_input,col)
 
                 row = col.row()
                 row.prop(self, 'bevel_affect', expand=True)
@@ -302,7 +311,7 @@ class F_OT_AddModifier(Operator):
             # Mirror
             case 'MIRROR':
                 col.use_property_split = True
-                self.use_manual_type(self.use_manual,col)
+                self.use_manual_type(self.use_manual_input,col)
 
                 row = col.row()
                 row = col.row(align=True, heading="Axis")
@@ -318,7 +327,7 @@ class F_OT_AddModifier(Operator):
             # Solidify
             case 'SOLIDIFY':
                 col.use_property_split = True
-                self.use_manual_type(self.use_manual,col)
+                self.use_manual_type(self.use_manual_input,col)
 
                 col.prop(self, 'solidify_thickness')
                 col.prop(self, 'solidify_offset', slider=True)
@@ -330,7 +339,7 @@ class F_OT_AddModifier(Operator):
                 ...
             # Shrinkwrap
             case 'SHRINKWRAP':
-                self.use_manual_type(self.use_manual,col)
+                self.use_manual_type(self.use_manual_input,col)
 
                 col.use_property_split = True
 
@@ -342,7 +351,7 @@ class F_OT_AddModifier(Operator):
             case 'ARRAY':
                 col.use_property_split = True
 
-                self.use_manual_type(self.use_manual,col)
+                self.use_manual_type(self.use_manual_input,col)
 
                 row = col.row()
                 row.prop(self, 'array_along_single_axis', text="Along Single Axis")
@@ -355,35 +364,40 @@ class F_OT_AddModifier(Operator):
 
                 row = col.row(heading="Object Offset")
                 row.prop(self, 'array_use_object_offset', text="Use Object Offset", toggle=True)
+                
+                col.prop(self, 'array_offset_v', text="Offset V", slider = True)
+                col.prop(self, 'array_offset_u', text="Offset U", slider = True)
+
+
             # Triangulate
             case 'TRIANGULATE':
                 col.use_property_split = True
-                self.use_manual_type(self.use_manual,col)
+                self.use_manual_type(self.use_manual_input,col)
 
                 col.prop(self, 'triangulate_min_vertices', text="Min Vertices")
             # SimpleDeform
             case 'SIMPLE_DEFORM':
                 col.use_property_split = True
                 col.label(text="SIMPLE_DEFORM!")
-            
+
 
             # Basic
             case _:
                 col.use_property_split = True
 
-                self.use_manual_type(self.use_manual,col)
+                self.use_manual_type(self.use_manual_input,col)
 
-                col.label(text="Done!")                    
+                col.label(text="Done!")
 
     def invoke(self, context: Context, event):
         wm = context.window_manager
         # return wm.invoke_props_popup(self, event)
-        if self.use_manual:
+        if self.use_manual_input:
             return wm.invoke_props_dialog(self)
         else:
             return self.execute(context)
-    def use_manual_type(self, is_true: bool, layout)-> None:
-        if is_true:
+    def use_manual_type(self, use: bool, layout) -> None:
+        if use:
             layout.prop(self, 'modifier_type', text="Modifier Type")
 
 class F_OT_ClearAllModifier(Operator):
@@ -423,8 +437,8 @@ class F_OT_RemoveModifier(Operator):
         for obj in C.selected_objects:
             if modifier_key in obj.modifiers.keys():
                 P(f"{modifier_key} in {obj.name}")
-                modifier = C.object.modifiers.get(modifier_key)
-                C.object.modifiers.remove(modifier)
+                modifier = obj.modifiers.get(modifier_key)
+                obj.modifiers.remove(modifier)
 
             else:
                 ignore_list.append(obj.name)

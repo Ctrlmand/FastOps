@@ -22,11 +22,11 @@ def P_row(col_info:int = 37, info:any = None, width:int = 40, separator:str='', 
     
     print(strCol(separator_col, side)+f"\033[{col_info}m{info:{separator}{align}{width}}\033[0m"+strCol(separator_col, side))
 
-def Log(info:any) -> None:
+def InfoOut(info:any) -> None:
     P(col=96, info=info)
 
-def Warning(info:any) -> None:
+def LabelOut(info:any) -> None:
     P(col=93, info=info)
 
-def Error(info:any) -> None:
+def TitleOut(info:any) -> None:
     P(col=91, info=info)

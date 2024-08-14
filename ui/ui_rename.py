@@ -1,5 +1,5 @@
 import bpy
-from ..operators import object_rename, obj_move_to_collection_by_name
+from ..operators import object_organize, object_rename
 
 # Rename Panel 
 class FASTOPS_UI_PT_Rename(bpy.types.Panel):
@@ -59,7 +59,7 @@ class FASTOPS_UI_PT_Rename(bpy.types.Panel):
 
         row.label(text="Group By Name")
         row = layout.row()
-        row.operator(obj_move_to_collection_by_name.F_OT_ObjMoveToCollectionByName.bl_idname, text="Group it!")
+        row.operator(object_organize.F_OT_ObjMoveToCollectionByName.bl_idname, text="Group it!")
 _cls=[
     FASTOPS_UI_PT_Rename,
 ]

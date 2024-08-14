@@ -2,7 +2,7 @@ from typing import Any, Set
 import bpy
 from bpy.types import Context
 from ..utility.base_class import Operator
-from ..utility.debug import Log, Warning, Error
+from ..utility.debug import InfoOut, LabelOut, TitleOut
 
 class F_OT_SwitchColorSpace(Operator):
     """Switch Textures Color Space"""
@@ -140,45 +140,89 @@ class F_OT_FindMaterialByTextureNode(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     image_name: bpy.props.StringProperty(name="Image Name", default="") # type: ignore
+    show_hide: bpy.props.BoolProperty(name="Show Hide", default=False) # type: ignore
 
     def execute(self, conxtex):
+        # debug
+        TitleOut("Find Material By Texture Node")
+
+        IMAGE_TEXTURE = 'Image Texture'
+        TEX_IMAGE = 'TEX_IMAGE'
+
         C = bpy.context
         D = bpy.data
         
-        obj_temp=[]
         mat_temp=[]
-        image_name = self.image_name
-        for obj in D.objects:
-            Error(f"Obj:{obj.name}")
-            if obj.type != 'MESH':
-                continue
-            for slot in obj.material_slots.values():
-                node_tree = slot.material.node_tree
-                Warning(slot.material.name)
-                for node in node_tree.nodes.values():
-                    if node.type == 'TEX_IMAGE' and node.image.name == image_name:
-                        C.view_layer.objects.active = obj
-                        Log(node.name)
-                        obj.active_material_index = slot.slot_index
-                        if not slot.material in mat_temp:
-                            mat_temp.append(slot.material)
-                        if not obj in obj_temp:
-                            obj_temp.append(obj)
-            Log("--------------")
-            Log(obj_temp)
-            
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in obj_temp:
-            obj.select_set(True)
+        obj_temp=[]
 
-        # report
-        if len(obj_temp) != 0:
-            self.Log(f"{len(obj_temp)} Objects, {len(mat_temp)} Materials")
+        # traverse data to find material that has target texture node 
+        for material in D.materials:
+            LabelOut(f"\tMaterial: {material.name}")
+
+            # material has no node tree
+            if not material.use_nodes:
+                continue
+
+            node_tree = material.node_tree
+
+            # if there has texture node in node tree
+            if IMAGE_TEXTURE in node_tree.nodes.keys():
+
+                # traverse texture node in material
+                for node in node_tree.nodes.values():
+                    # if node's type same as target type
+                    if node.type == TEX_IMAGE:
+                        # if node's name same as target name
+                        if node.image.name == self.image_name:
+                            mat_temp.append(material.name)
+                            InfoOut(f"\t\thas target texture")
+                            break
+                    else:
+                        continue
+                        ...
+                    ...
+                ...
+            # if there has texture node
+            else:
+                continue
+        
+        mat_temp = set(mat_temp)
+        # traverse data to find objects has target material
+        for object in D.objects:
+            if object.type == 'MESH':
+                material_slots = object.material_slots.keys()
+                # if objects's material slots has target material
+                if set(material_slots).intersection(mat_temp):
+                    obj_temp.append(object.name)
+                    ...
+                else:
+                    continue
+            # when object not a mesh
+            else:
+                continue
+        
+        obj_temp = set(obj_temp)
+
+        # traverse data to find objects in set
+        for name in obj_temp:
+            obj = D.objects[name]
+            
+            # if show hide
+            if obj.hide_get():
+                obj.hide_set(not self.show_hide)
+            # if select
+            if not obj.hide_get():
+                obj.select_set(True)
+
+        # self.Log(f"{len(obj_temp)} objects has target texture")
+        self.Log(f"FINISHED!")
+        
         return {"FINISHED"}
-    
+
     def draw(self, context: Context | Any):
         layout = self.layout
         layout.prop_search(self, "image_name", bpy.data, "images")
+        layout.prop(self, "show_hide")
         ...
 
     def invoke(self, context, event):
