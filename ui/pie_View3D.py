@@ -1,5 +1,5 @@
 import bpy
-from ..operators import object_modifier, object_material, object_rename, object_select, node_mat
+from ..operators import object_modifier, object_material, object_rename, object_select, node_mat, mesh
 
 class VIEW3D_MT_ModifierPieMenu(bpy.types.Menu):
     """Object Option Pie Menu"""
@@ -37,7 +37,7 @@ class VIEW3D_MT_ModifierPieMenu(bpy.types.Menu):
         ## Right Down
         pie.operator(object_modifier.F_OT_AddModifier.bl_idname, text="Shrinkwrap", icon="MOD_SHRINKWRAP").modifier_type = 'SHRINKWRAP'
 
-class VIEW3D_MT_MaterialPieMenu(bpy.types.Menu):
+class VIEW3D_MT_AlternatePieMenu(bpy.types.Menu):
     """Material Pie Menu"""
     bl_idname = "VIEW3D_MT_MaterialPieMenu"
     bl_label = "F Material"
@@ -59,7 +59,19 @@ class VIEW3D_MT_MaterialPieMenu(bpy.types.Menu):
 
         ## Left Up
         pie.operator(node_mat.F_OT_FindMaterialByTextureNode.bl_idname, text="Select By Image", icon="OUTLINER_OB_IMAGE")
+
+        ## Right Up
+        pie.operator(object_select.F_OT_SelectObjectByName.bl_idname, text="Select By Name", icon="COLLAPSEMENU")
+
+        ## Left Down
+        pie.operator(mesh.F_OT_GetMeshMatchedObjects.bl_idname, text="Match Mesh By Name", icon="MESH_DATA")
+
+        ## Right Down
+        pie.operator(mesh.F_OT_BatchAddUVLayer.bl_idname, text="Add UV Layer", icon="GROUP_UVS")
+        
+        
+
 _cls=[
     VIEW3D_MT_ModifierPieMenu,
-    VIEW3D_MT_MaterialPieMenu,
+    VIEW3D_MT_AlternatePieMenu,
 ]

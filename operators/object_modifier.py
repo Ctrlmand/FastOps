@@ -6,6 +6,7 @@ from bpy.types import Context
 from ..utility.base_class import Operator
 from ..utility.debug import P
 from ..utility import props
+from ..utility.vars import C, D
 
 class F_OT_AddModifier(Operator):
     """Batch Add Modifier To Selected Objects"""
@@ -127,23 +128,23 @@ class F_OT_AddModifier(Operator):
             case 'BEVEL':
                 # interation
                 for obj in selected_objects:
-                        context.view_layer.objects.active = obj
-                        obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
+                    context.view_layer.objects.active = obj
+                    obj.modifiers.new(name=str.title(self.modifier_type), type = self.modifier_type)
 
-                        mod=obj.modifiers[-1]
-                        
-                        mod.affect = self.bevel_affect
-                        mod.width = self.bevel_width
-                        mod.segments = self.bevel_segments
+                    mod=obj.modifiers[-1]
+                    
+                    mod.affect = self.bevel_affect
+                    mod.width = self.bevel_width
+                    mod.segments = self.bevel_segments
 
-                        mod.limit_method = self.bevel_limit_method
-                        # if Angle
-                        if self.bevel_limit_method == 'ANGLE':
-                            mod.angle_limit = self.bevel_angle_limit
+                    mod.limit_method = self.bevel_limit_method
+                    # if Angle
+                    if self.bevel_limit_method == 'ANGLE':
+                        mod.angle_limit = self.bevel_angle_limit
 
-                        mod.profile = self.bevel_profile
+                    mod.profile = self.bevel_profile
 
-                        mod.use_clamp_overlap = self.bevel_use_clamp_overlap
+                    mod.use_clamp_overlap = self.bevel_use_clamp_overlap
             # Mirror
             case 'MIRROR':
 
@@ -430,7 +431,6 @@ class F_OT_RemoveModifier(Operator):
     
 
     def execute(self, context):
-        C = context
         modifier_key = self.modifier_key.title()
         ignore_list=[]
         

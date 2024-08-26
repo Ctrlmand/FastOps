@@ -1,7 +1,8 @@
 from typing import Any, Set
 import bpy
 from bpy.types import Context
-from ..utility.debug import P
+from ..utility.debug import P, InfoOut
+from ..utility.matching import MatchObjectByPrefix
 from ..utility.base_class import Operator
 
 class F_OT_AddSplitNormal(Operator):
@@ -57,33 +58,66 @@ class F_OT_ClearSharp(Operator):
         self.Log(f"{i} objects finished")
         return {"FINISHED"}
 
-bpy.types.Scene.F_MeshBatchAddUVLayer_name = bpy.props.StringProperty(name="F_Mesh_AddUVLayer_Name", default="")
-
 class F_OT_BatchAddUVLayer(Operator):
     """Batch add UV layer"""
     bl_idname = "mesh.f_batch_add_uv_layer"
     bl_label = "Batch Add UV Layer"
     bl_options = {'REGISTER', 'UNDO'}
 
+    uv_name: bpy.props.StringProperty(name="UV Name", default="") # type: ignore
+
     def execute(self, context: Context):
         C=context
-        uv_name = context.scene.F_MeshBatchAddUVLayer_name
         
         for obj in C.selected_objects:
-            if obj.data.uv_layers.get(uv_name) != None:
+            if obj.data.uv_layers.get(self.uv_name) != None:
                  continue
 
             uvlayer_index = len(obj.data.uv_layers.keys())
-            obj.data.uv_layers.new(name = uv_name)
+            obj.data.uv_layers.new(name = self.uv_name)
             obj.data.uv_layers.active_index = uvlayer_index
 
         self.Log(f"UV layers added sucessfully!")
 
         return {"FINISHED"}
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "uv_name", text="UV Name")
+
+class F_OT_GetMeshMatchedObjects(Operator):
+    """Match mesh from high or low model"""
+    bl_idname = "mesh.f_get_mesh_matched_objects"
+    bl_label = "Get Mesh Matched Objects"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context: Context):
+        for obj in context.selected_objects:
+            matched_obj = MatchObjectByPrefix(obj)
+
+            # match sucess
+            if matched_obj != None:
+                # report
+                self.Log(f"Success: matched {matched_obj.name}")
+
+                new_mesh = bpy.data.meshes.new_from_object(matched_obj, preserve_all_data_layers=True)
+                obj.data = new_mesh
+
+            else:
+                self.Warning(f"Failed: matched {matched_obj.name}")
+                continue
+
+            ...
+        return {"FINISHED"}
+    ...
 
 _cls=[
     F_OT_AddSplitNormal,
     F_OT_ClearSplitNormal,
     F_OT_ClearSharp,
     F_OT_BatchAddUVLayer,
+    F_OT_GetMeshMatchedObjects,
 ]

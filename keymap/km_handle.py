@@ -2,7 +2,6 @@ import bpy
 from .. import operators, ui
 from ..utility.debug import P_row
 
-
 # keymap list
 addon_km=[]
 # Register
@@ -54,14 +53,14 @@ def register():
     addon_km.append((km_node_editor, node_editor_kmi_list))
 
     ...
-    # >> Object Modifier & Object Material KM <<
+    # >> Object Modifier & Object Alternate KM <<
     km_object_3dview = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
 
     kmi_object_3dview_call_modifier_pie = km_object_3dview.keymap_items.new('wm.call_menu_pie', 'F', 'PRESS', ctrl=False, shift=False, alt=False)
     kmi_object_3dview_call_modifier_pie.properties.name = ui.pie_View3D.VIEW3D_MT_ModifierPieMenu.bl_idname
 
     kmi_object_3dview_call_material_pie = km_object_3dview.keymap_items.new('wm.call_menu_pie', 'F', 'PRESS', ctrl=True, shift=False, alt=False)
-    kmi_object_3dview_call_material_pie.properties.name = ui.pie_View3D.VIEW3D_MT_MaterialPieMenu.bl_idname
+    kmi_object_3dview_call_material_pie.properties.name = ui.pie_View3D.VIEW3D_MT_AlternatePieMenu.bl_idname
     ## append to km
     object_3dview_kmi_list=[
         kmi_object_3dview_call_modifier_pie,

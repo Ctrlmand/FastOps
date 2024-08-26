@@ -4,6 +4,7 @@ from typing import Any, Set
 from bpy.types import Context
 from ..utility.base_class import Operator
 from ..utility.debug import P
+from ..utility.vars import C, D
 
 # F_OT_ObjectBatchRename
 ## rename
@@ -240,9 +241,6 @@ class F_OT_EditMaterialNameInSelectedObjects(Operator):
     
 
     def execute(self, context: Context):
-        C = bpy.context
-        D = bpy.data
-        
         prefix= context.scene.F_EditMaterialNameInSelectedObjects_namePrefix
         ignore=0
 
@@ -254,7 +252,7 @@ class F_OT_EditMaterialNameInSelectedObjects(Operator):
                 ignore +=1
                 continue
             else:
-                D.materials[mat].name = f"{prefix}{D.materials[mat].name}"
+                bpy.data.materials[mat].name = f"{prefix}{D.materials[mat].name}"
 
         self.Log(f"{len(mat_set)-ignore} materials renamed, {ignore} materials ignored")
         return {'FINISHED'}

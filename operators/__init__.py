@@ -1,13 +1,13 @@
-import bpy
 import os
 import importlib
 from bpy.types import Context
 from .. import utility
 from ..utility.base_class import Operator
-from ..utility.debug import P
+from ..utility.debug import P, InfoOut
 from ..utility import props
 
-
+import bpy
+# ------------------------------------------------------------------------------------------------------------------------
 
 # import submod
 correct_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,9 +22,9 @@ _modcls=[]
 for mod in submod:
     _modcls += mod._cls
 
+# ----------------------------------------------------------------------------------------------------------------------
+
 # test operator
-
-
 class F_OT_TEST(Operator):
     """"Test Operator"""
     bl_idname = "object.f_test"
@@ -39,7 +39,7 @@ class F_OT_TEST(Operator):
         # self.Warning("Warning")
         # self.Error("Error")
 
-        P(31, self.info)
+        InfoOut(bpy.data.meshes[1].name)
         return {'FINISHED'}
 
 

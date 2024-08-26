@@ -5,91 +5,113 @@ from bpy.types import Context
 from typing import Union
 from ..utility.debug import P, InfoOut
 from ..utility.base_class import Operator
+from ..utility.vars import *
 
-# scene property
-bpy.types.Scene.FastOpsObjectSelectBy = bpy.props.EnumProperty(
-    name="Object Select By",
-    items=[
-        ('prefix', 'Prefix', 'By Prefix', 0),
-        ('suffix', 'Suffix', 'By Suffix', 1),
-        ('both', 'Both', 'By Both', 2),
-    ],
-    default='prefix'
-)
 
 class F_OT_SelectObjectByName(Operator):
     """Select Same Prefix Objects"""
     bl_idname = "object.f_select_same_prefix_objects"
     bl_label = "Select Same Prefix Objects"
     bl_options = {'REGISTER', 'UNDO'}
+
+    select_method: bpy.props.EnumProperty( # type: ignore
+        name="Select Method",
+        items=[
+            (PREF, "Prefix", ''),
+            (SUFF, "Suffix", ''),
+        ],
+        default='prefix'
+    )
+
+
+    def MatchName(self, name: str):
+        """"match"""
+        compile = re.compile(r'(?P<prefix>[\w]+)(?P<separator>[\s_.])(?P<suffix>[a-zA-Z0-9]+)')
+        return compile.match(name)
+
     # select method
-    def GetObjSetByName(self, context: Context, type: str):
+    def GetListBySelectedName(self, context: Context, method: str):
         """Find the object have same feature in their name; return a object set"""
-        # global value
-        name_regular_compile = re.compile(r'(?P<prefix>[A-Za-z_]+)(?P<index>\d+)(?P<suffix>_[\w.]+)')
-        objects = context.selected_objects
-        count=0
-        select_list=[]
+# -----------------------------------------------
+        selected_objs = context.selected_objects
+        data_objs = bpy.data.objects
+        resault_list=[]
+
+# -----------------------------------------------
+
         # make sure is objects
-        if not objects:
+        if not selected_objs:
             self.Error("No Objects Selected")
             return {'CANCELLED'}
         # make sure is right value
-        if type not in {'prefix', 'suffix', 'both'}:
-            self.Error("Invalid Type")
+        if method not in [PREF, SUFF]:
+
+            self.Error(f"Invalid Type, type is{method}")
             return {'CANCELLED'}
-        # 1.is 'prefix' or 'suffix'
-        if not type  == 'both':
-            # 2.traversal in selected objects
-            for obj in objects:
-                # 3.get name part
-                name_tmp = name_regular_compile.search(obj.name)
-                # make sure name is right
-                if not name_tmp:
-                    self.Error("Illegal Object Name Format")
-                    return {'CANCELLED'}                # 3.select object by name part
-                target_part = name_tmp.group(type)
-                # 4.traversal in data to find...
-                for obj in bpy.data.objects:
-                    # 5.if have same prefix or suffix
-                    if target_part in obj.name:
-                        # obj.select_set(True)
-                        select_list.append(obj)
-                    ...
-        # 6.is 'both'
-        else:
-            # 7.traversal in selected objects
-            for obj in objects:
-                # get name part
-                name_tmp = name_regular_compile.search(obj.name)
-                # make sure name is right
-                if not name_tmp:
-                    self.Error("Illegal Object Name Format")
-                    return {'CANCELLED'}                # 3.select object by name part
-                target_prefix = name_tmp.group('prefix')
-                target_suffix = name_tmp.group('suffix')
-                self.Log(f"{target_prefix} {target_suffix}")
-                # 8.traversal in data to find...
-                for obj in bpy.data.objects:
-                    # 9.if have same prefix and suffix
-                    if target_suffix in obj.name and target_prefix in obj.name:
-                        # obj.select_set(True)
-                        select_list.append(obj)
-                    ...
-        return set(select_list)
+
+
+        if method == PREF:
+            target_name = str()
+            for obj in selected_objs:
+                match = self.MatchName(obj.name)
+                # part
+                part_prefix = match.group(PREF)
+                part_suffix = match.group(SUFF)
+
+                # low or high
+                if part_suffix == LOW:
+                    target_name = part_prefix + '_' + HIGH
+                elif part_suffix == HIGH:
+                    target_name = part_prefix + '_' + LOW
+                resault_list.append(target_name)
+            ...
+        elif method == SUFF:
+            suffix_list = []
+            # get all suffix
+            for obj in selected_objs:
+                
+                match = self.MatchName(obj.name)
+                part_suffix = match.group(SUFF)
+                suffix_list.append('_' + part_suffix)
+            # find in data
+            for obj in data_objs:
+                # check obj name endswith suffix in list
+                for suff in suffix_list:
+                    if obj.name.endswith(suff):
+                        resault_list.append(obj.name)
+                        break
+            ...
+        # Finally
+        return set(resault_list)
     def execute(self, context):
         # select method
-        select_by = context.scene.FastOpsObjectSelectBy
-        obj_list = self.GetObjSetByName(context, select_by)
+        select_method = self.select_method
+
+        obj_list = self.GetListBySelectedName(context, select_method)
+
+        # check
         if obj_list == {'CANCELLED'}:
             return {'CANCELLED'}
+        # debug
+        InfoOut(f"{obj_list}")
+
         # select!!!
-        self.Log(f"{obj_list}")
-        for obj in obj_list:
-            obj.select_set(True)
+        for name in obj_list:
+            bpy.data.objects[name].select_set(True)
         self.Log(f"selected {len(obj_list)} objects")
         return {'FINISHED'}
     
+    def draw(self, context):
+        layout = self.layout
+
+        layout.prop(self, "select_method")
+        ...
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return self.execute(context)
+        ...
+
 class F_OT_SelectObjectByMaterial(Operator):
     """Select Object By Material"""
     bl_idname = 'object.f_select_object_by_material'

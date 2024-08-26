@@ -3,6 +3,7 @@ import bpy
 from bpy.types import Context
 from ..utility.base_class import Operator
 from ..utility.debug import InfoOut, LabelOut, TitleOut
+from ..utility.vars import D, C
 
 class F_OT_SwitchColorSpace(Operator):
     """Switch Textures Color Space"""
@@ -149,14 +150,11 @@ class F_OT_FindMaterialByTextureNode(Operator):
         IMAGE_TEXTURE = 'Image Texture'
         TEX_IMAGE = 'TEX_IMAGE'
 
-        C = bpy.context
-        D = bpy.data
-        
         mat_temp=[]
         obj_temp=[]
 
         # traverse data to find material that has target texture node 
-        for material in D.materials:
+        for material in bpy.data.materials:
             LabelOut(f"\tMaterial: {material.name}")
 
             # material has no node tree
@@ -188,7 +186,7 @@ class F_OT_FindMaterialByTextureNode(Operator):
         
         mat_temp = set(mat_temp)
         # traverse data to find objects has target material
-        for object in D.objects:
+        for object in bpy.data.objects:
             if object.type == 'MESH':
                 material_slots = object.material_slots.keys()
                 # if objects's material slots has target material
@@ -205,7 +203,7 @@ class F_OT_FindMaterialByTextureNode(Operator):
 
         # traverse data to find objects in set
         for name in obj_temp:
-            obj = D.objects[name]
+            obj = bpy.data.objects[name]
             
             # if show hide
             if obj.hide_get():
