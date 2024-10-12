@@ -3,7 +3,7 @@ import re
 from typing import Any, Set
 from bpy.types import Context
 from ..utility.base_class import Operator
-from ..utility.debug import P
+from ..utility.debug import InfoOut, LabelOut, TitleOut
 from ..utility.vars import C, D
 
 # F_OT_ObjectBatchRename
@@ -110,121 +110,92 @@ class F_OT_RenameByActiveMaterialName(Operator):
     bl_label = "Rename By Active Material"
     bl_options = {'REGISTER', 'UNDO'}
 
-    is_only_obj: bpy.props.BoolProperty(name="Is Only Object", default=False)# type:ignore
+    # is_only_obj: bpy.props.BoolProperty(name="Is Only Object", default=False)# type:ignore
     set_mesh_name: bpy.props.BoolProperty(name="Set Mesh Name", default=True)# type:ignore
 
     def execute(self, context: Context):
+
         # scene property
         suffix_number = context.scene.F_ObjectBatchRename_suffixNumber
         suffix_start = context.scene.F_ObjectBatchRename_suffixStart
-        is_only_obj = self.is_only_obj
-        set_mesh_name = self.set_mesh_name
+        # is_only_obj = self.is_only_obj
 
         # alias
         selected = bpy.context.selected_objects
         # variable
         mat_name_list=[]
         obj_name_list=[]
-        ignore_list=[]
-        null_mat_obj_list=[]
-        empty_cout=0
+        ignore_cout=0
         changed_count=0
-        # Is Only Object
-        if is_only_obj:
-            # Body
-            for obj in selected:
-                if obj.active_material.users == 1:
-                    obj.name = obj.active_material.name
-                    changed_count+=1
-                else:
-                    ignore_list.append(obj.name)
-            # Report
-            if len(ignore_list) > 0:
-                self.Log(f"{changed_count} Changed!,\tIgnored:{ignore_list}")
-                bpy.ops.object.select_all(action='DESELECT')
-                # Select Ignored
-                for name in ignore_list:
-                    bpy.data.objects[name].select_set(True)
-            else:
-                self.Log(f"Done!")
-            # Do Set Mesh Name
-            if set_mesh_name:
-                bpy.ops.object.f_set_mesh_name()
-            return {'FINISHED'}
 
         # 1.get selected objects active material name by traversal
         for obj in selected:
-            # 1.if obj not mesh
+            # make sure obj and mat is ok
             if obj.type != "MESH":
-                empty_cout+=1
+                ignore_cout+=1
                 continue
             if obj.active_material == None:
-                null_mat_obj_list.append(obj.name)
                 continue
+            # get selected mat list
             mat_name_list.append(obj.active_material.name)
-        # 2.convert to set
+        # convert to set
         mat_name_set = set(mat_name_list)
 
-        #debug
-        # P(94, f">> material set: <<")
-        # P(93, f"(mat):{mat_name_set}")
-
-        # 3.get object list
-        for mat_name in mat_name_set:
-            # 4.find obj in scene
-            for obj in bpy.data.objects:
-                # 5.if have same material
-                P(94, f"{obj.name}")
-                if obj.type != "MESH" or obj.active_material == None:
-                    continue
-                if obj.active_material.name == mat_name:
-                    # 6.store in list
-                    obj_name_list.append(obj.name)
-                    # print(f"\033[32m >> {obj.name} << \033[0m")
-        # debug
-        # P(94, f">> object list: <<")
-        # P(94, f"(object):{obj_name_list}")
+        # 3.get obj list
+        for obj in bpy.data.objects:
+            # make sure obj ok
+            if obj.type != "MESH" or obj.active_material == None:
+                continue
+            # if have same material
+            if obj.active_material.name in mat_name_set:
+                # 6.store to list
+                obj_name_list.append(obj.name)
 
         # 8.rename object
-        removed_obj_name=[]
         # mat
         for mat_name in mat_name_set:
-            name_count=suffix_start # start with each mat
+            TitleOut(mat_name)          
+            # start with each mat
+            name_count=suffix_start 
+
             # obj
             for obj_name in obj_name_list:
-                # if slots[0] == mat_name : rename and store objects
-                if mat_name == bpy.data.objects[obj_name].material_slots[0].name:
-                    if obj_name in bpy.context.view_layer:
-                        bpy.data.objects[obj_name].select_set(True)
-                    removed_obj_name.append(obj_name)
+                # start with each obj
+                obj = bpy.data.objects.get(obj_name)
+
+                # obj active_mat is mat 
+                if mat_name == obj.active_material.name:
+                    # obj's mat has only one user
+                    if bpy.data.materials.get(mat_name).users == 1:
+                        LabelOut("Only One User")
+                        obj.name = mat_name
+                        changed_count+=1
+                        break
+
+                    new_name = f"{mat_name}.{name_count:>0{suffix_number}}"
                     # obj name is same as changed name
-                    if bpy.data.objects[obj_name].name == f"{mat_name}.{name_count:>0{suffix_number}}":
+                    if bpy.data.objects[obj_name].name == new_name:
                         name_count+=1
-                        empty_cout+=1
+                        ignore_cout+=1
                         continue
                     else:
-                        bpy.data.objects[obj_name].name = f"{mat_name}.{name_count:>0{suffix_number}}"
+                        bpy.data.objects[obj_name].name = new_name
                         name_count+=1
                         changed_count+=1
-                        # debug
-                        # P(33, f">> {mat_name}:{obj_name} <<")
-                        # P(32, f"suffix count:{name_count}")
-            # from origin list remove renamed object list
-            obj_name_list = list(set(obj_name_list) - set(removed_obj_name))
-        if set_mesh_name:
-            bpy.ops.object.f_set_mesh_name()
+                        
+                    # in view layer-select
+                    if obj_name in bpy.context.view_layer:
+                        bpy.data.objects[obj_name].select_set(True)
+
+        # set mesh name
+        bpy.ops.object.f_set_mesh_name()
+
         # 9.report info
-        if changed_count == 0 and empty_cout == 0:
+        if changed_count == 0 and ignore_cout == 0:
             self.Warning(f"Nothing changed")
         else:
-            self.Log(f"{changed_count} object renamed, {empty_cout} objects ignored")
+            self.Log(f"{changed_count} object renamed, {ignore_cout} objects ignored")
 
-        if len(null_mat_obj_list) > 0:
-            bpy.ops.object.select_all(action='DESELECT')
-            for name in null_mat_obj_list:
-                bpy.data.objects[name].select_set(True)
-            self.Warning(f"{len(null_mat_obj_list)} objects have no material")
-            ...
         return {'FINISHED'}
     def invoke(self, context: Context, event):
         # wm = context.window_manager

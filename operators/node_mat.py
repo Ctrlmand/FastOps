@@ -155,7 +155,7 @@ class F_OT_FindMaterialByTextureNode(Operator):
 
         # traverse data to find material that has target texture node 
         for material in bpy.data.materials:
-            LabelOut(f"\tMaterial: {material.name}")
+            TitleOut(f"\tMaterial: {material.name}")
 
             # material has no node tree
             if not material.use_nodes:
@@ -169,11 +169,12 @@ class F_OT_FindMaterialByTextureNode(Operator):
                 # traverse texture node in material
                 for node in node_tree.nodes.values():
                     # if node's type same as target type
-                    if node.type == TEX_IMAGE:
+                    if node.type == TEX_IMAGE and node.image != None:
+                        LabelOut(f"\t\t{node.image.name}")
                         # if node's name same as target name
                         if node.image.name == self.image_name:
                             mat_temp.append(material.name)
-                            InfoOut(f"\t\thas target texture")
+                            InfoOut(f"\t\t\tHas Target Texture")
                             break
                     else:
                         continue
@@ -205,6 +206,8 @@ class F_OT_FindMaterialByTextureNode(Operator):
         for name in obj_temp:
             obj = bpy.data.objects[name]
             
+            bpy.ops.object.select_all(action='DESELECT')
+
             # if show hide
             if obj.hide_get():
                 obj.hide_set(not self.show_hide)
@@ -213,7 +216,7 @@ class F_OT_FindMaterialByTextureNode(Operator):
                 obj.select_set(True)
 
         # self.Log(f"{len(obj_temp)} objects has target texture")
-        self.Log(f"FINISHED!")
+        self.Log(f"Done!")
         
         return {"FINISHED"}
 
