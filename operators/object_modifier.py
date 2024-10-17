@@ -6,7 +6,6 @@ from bpy.types import Context
 from ..utility.base_class import Operator
 from ..utility.debug import P
 from ..utility import props
-from ..utility.vars import C, D
 
 class F_OT_AddModifier(Operator):
     """Batch Add Modifier To Selected Objects"""
@@ -434,7 +433,7 @@ class F_OT_RemoveModifier(Operator):
         modifier_key = self.modifier_key.title()
         ignore_list=[]
         
-        for obj in C.selected_objects:
+        for obj in context.selected_objects:
             if modifier_key in obj.modifiers.keys():
                 P(f"{modifier_key} in {obj.name}")
                 modifier = obj.modifiers.get(modifier_key)

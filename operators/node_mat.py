@@ -3,7 +3,6 @@ import bpy
 from bpy.types import Context
 from ..utility.base_class import Operator
 from ..utility.debug import InfoOut, LabelOut, TitleOut
-from ..utility.vars import D, C
 
 class F_OT_SwitchColorSpace(Operator):
     """Switch Textures Color Space"""

@@ -4,7 +4,7 @@ from typing import Any, Set
 from bpy.types import Context
 from ..utility.base_class import Operator
 from ..utility.debug import InfoOut, LabelOut, TitleOut
-from ..utility.vars import C, D
+from ..utility.varis import ObjType
 
 # F_OT_ObjectBatchRename
 ## rename
@@ -161,7 +161,11 @@ class F_OT_RenameByActiveMaterialName(Operator):
             # obj
             for obj_name in obj_name_list:
                 # start with each obj
+                if not obj_name in bpy.data.objects.keys():
+                    continue
                 obj = bpy.data.objects.get(obj_name)
+                if obj.type != ObjType.MESH:
+                    continue
 
                 # obj active_mat is mat 
                 if mat_name == obj.active_material.name:
@@ -217,13 +221,13 @@ class F_OT_EditMaterialNameInSelectedObjects(Operator):
 
         p = re.compile(f"{prefix}")
 
-        mat_set = set(C.object.material_slots.keys())
+        mat_set = set(context.object.material_slots.keys())
         for mat in mat_set:
             if p.match(f"{mat}"):
                 ignore +=1
                 continue
             else:
-                bpy.data.materials[mat].name = f"{prefix}{D.materials[mat].name}"
+                bpy.data.materials[mat].name = f"{prefix}{bpy.data.materials[mat].name}"
 
         self.Log(f"{len(mat_set)-ignore} materials renamed, {ignore} materials ignored")
         return {'FINISHED'}

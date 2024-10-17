@@ -5,7 +5,7 @@ from bpy.types import Context
 from typing import Union
 from ..utility.debug import P, InfoOut
 from ..utility.base_class import Operator
-from ..utility.vars import *
+from ..utility.varis import *
 
 
 class F_OT_SelectObjectByName(Operator):

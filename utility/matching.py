@@ -1,7 +1,7 @@
 import bpy
 import re
 
-from .vars import *
+from .varis import *
 from ..utility.debug import InfoOut, LabelOut, TitleOut
 
 def match_obj(list: list, type: str) -> list:

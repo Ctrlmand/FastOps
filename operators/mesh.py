@@ -4,6 +4,7 @@ from bpy.types import Context
 from ..utility.debug import P, InfoOut
 from ..utility.matching import MatchObjectByPrefix
 from ..utility.base_class import Operator
+from ..utility.varis import ObjType
 
 class F_OT_AddSplitNormal(Operator):
     """Batch add split normal"""
