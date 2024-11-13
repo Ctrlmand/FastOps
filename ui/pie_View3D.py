@@ -17,6 +17,7 @@ class VIEW3D_MT_ModifierPieMenu(bpy.types.Menu):
 
         ## Down
         col = pie.split().box().column()
+        col.label(text="Modifier")
         col.operator(object_modifier.F_OT_AddModifier.bl_idname, text="Add Modifier", icon="ADD").use_manual_input = True
         col.operator(object_modifier.F_OT_RemoveModifier.bl_idname, text="Remove Modifier", icon="REMOVE")
         col.operator(object_select.F_OT_SelectByModifier.bl_idname, text="Select By Modifier", icon="RESTRICT_SELECT_OFF")
@@ -52,7 +53,11 @@ class VIEW3D_MT_AlternatePieMenu(bpy.types.Menu):
         pie.operator(object_rename.F_OT_RenameByActiveMaterialName.bl_idname, text="Rename By Active Material Name", icon="OUTLINER_OB_MESH")
 
         ## Down
-        pie.operator(object_rename.F_OT_SetMeshName.bl_idname, text="Set Mesh Name", icon="MESH_DATA")
+        col = pie.split().box().column()
+        col.label(text="UV")
+        col.operator(mesh.F_OT_BatchAddUVLayer.bl_idname, text="Add UV Layer", icon="GROUP_UVS")
+        col.operator(mesh.F_OT_UnifyActiveUVName.bl_idname, text="Unify Active UV Name", icon="UV_SYNC_SELECT")
+
 
         ## Up
         pie.operator(object_select.F_OT_SelectObjectByMaterial.bl_idname, text="Select By Material", icon="MATERIAL_DATA")
@@ -67,8 +72,7 @@ class VIEW3D_MT_AlternatePieMenu(bpy.types.Menu):
         pie.operator(mesh.F_OT_GetMeshMatchedObjects.bl_idname, text="Match Mesh By Name", icon="MESH_DATA")
 
         ## Right Down
-        pie.operator(mesh.F_OT_BatchAddUVLayer.bl_idname, text="Add UV Layer", icon="GROUP_UVS")
-        
+        pie.operator(object_rename.F_OT_SetMeshName.bl_idname, text="Set Mesh Name", icon="MESH_DATA")
         
 
 _cls=[

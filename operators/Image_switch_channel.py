@@ -1,8 +1,9 @@
 from typing import Any
 import bpy
+from ..utility.base_class import Operator
 from bpy.types import Context
 
-class F_OT_ImageChannelSet(bpy.types.Operator):
+class F_OT_ImageChannelSet(Operator):
     """Switch Image Display Channel"""
     bl_idname = "image.f_channel_set"
     bl_label = "Set Channel"

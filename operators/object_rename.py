@@ -4,7 +4,7 @@ from typing import Any, Set
 from bpy.types import Context
 from ..utility.base_class import Operator
 from ..utility.debug import InfoOut, LabelOut, TitleOut
-from ..utility.varis import ObjType
+from ..utility.varis import MESH
 
 # F_OT_ObjectBatchRename
 ## rename
@@ -164,7 +164,7 @@ class F_OT_RenameByActiveMaterialName(Operator):
                 if not obj_name in bpy.data.objects.keys():
                     continue
                 obj = bpy.data.objects.get(obj_name)
-                if obj.type != ObjType.MESH:
+                if obj.type != MESH:
                     continue
 
                 # obj active_mat is mat 

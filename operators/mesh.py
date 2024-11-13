@@ -4,7 +4,7 @@ from bpy.types import Context
 from ..utility.debug import P, InfoOut
 from ..utility.matching import MatchObjectByPrefix
 from ..utility.base_class import Operator
-from ..utility.varis import ObjType
+from ..utility.varis import MESH
 
 class F_OT_AddSplitNormal(Operator):
     """Batch add split normal"""
@@ -42,7 +42,7 @@ class F_OT_ClearSplitNormal(Operator):
 
 class F_OT_ClearSharp(Operator):
     """Batch clear sharp"""
-    bl_idname = "object.fastpos_clear_sharp"
+    bl_idname = "mesh.f_clear_sharp"
     bl_label = "Batch Clear Sharp"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -89,6 +89,24 @@ class F_OT_BatchAddUVLayer(Operator):
         layout = self.layout
         layout.prop(self, "uv_name", text="UV Name")
 
+class F_OT_UnifyActiveUVName(Operator):
+    """Unify active uv name"""
+    bl_idname = "mesh.f_unify_active_uv_name"
+    bl_label = "Unify Active UV Name"
+    bl_options = {'REGISTER', 'UNDO'}
+    def execute(self, contest):
+        targetName = "UVMap"
+        cnt=0
+        for obj in bpy.context.selected_objects:
+            if (obj.type == MESH):
+                uvName = obj.data.uv_layers.active.name
+                if (uvName != targetName):
+                    obj.data.uv_layers.active.name = targetName
+                    cnt += 1
+        
+        self.Log(f"{cnt} objects' UV name unified to '{targetName}'")
+        return{"FINISHED"}
+
 class F_OT_GetMeshMatchedObjects(Operator):
     """Match mesh from high or low model"""
     bl_idname = "mesh.f_get_mesh_matched_objects"
@@ -121,4 +139,5 @@ _cls=[
     F_OT_ClearSharp,
     F_OT_BatchAddUVLayer,
     F_OT_GetMeshMatchedObjects,
+    F_OT_UnifyActiveUVName,
 ]
