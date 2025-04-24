@@ -57,6 +57,8 @@ class VIEW3D_MT_AlternatePieMenu(bpy.types.Menu):
         col.label(text="UV")
         col.operator(mesh.F_OT_BatchAddUVLayer.bl_idname, text="Add UV Layer", icon="GROUP_UVS")
         col.operator(mesh.F_OT_UnifyActiveUVName.bl_idname, text="Unify Active UV Name", icon="UV_SYNC_SELECT")
+        col.operator(mesh.F_OT_ClearTargetUVMap.bl_idname, text="Clear Target UVLayer", icon="UV")
+        
 
 
         ## Up

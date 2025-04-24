@@ -1,5 +1,5 @@
 import bpy
-from ..operators import node_mat, node_mat, window_switch_ui_type
+from ..operators import node_mat, window_switch_ui_type
 
 # Node Option Pie Menu
 class FASTOPS_MT_NodeOptionPieMenu(bpy.types.Menu):

@@ -6,14 +6,15 @@ class FASTOPS_UI_PT_Rename(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "FastOps"
-    bl_label = "Rename"
+    bl_label = "Object"
 
     def draw(self, context):
         layout = self.layout
 
+        layout.label(text="Rename")
         # label
         box = layout.box()
-        box.label(text="Object")
+        box.label(text = "BatchRename")
         
         # get name
         row = box.row()
@@ -37,7 +38,9 @@ class FASTOPS_UI_PT_Rename(bpy.types.Panel):
         row.operator(object_rename.F_OT_ObjectBatchRename.bl_idname, text="Rename")
 
         # find and replace
-        box.split()
+        row = layout.row()
+        # new box
+        box = layout.box()
         box.label(text="Find And Replace")
         row = box.row()
         row.prop(context.scene, "FastOpsObjectBatchRename_find", text="Find")

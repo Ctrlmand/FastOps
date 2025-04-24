@@ -55,6 +55,7 @@ class F_OT_SelectObjectByName(Operator):
             for obj in selected_objs:
                 match = self.MatchName(obj.name)
                 # part
+
                 part_prefix = match.group(PREF)
                 part_suffix = match.group(SUFF)
 

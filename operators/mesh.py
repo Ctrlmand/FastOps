@@ -107,6 +107,34 @@ class F_OT_UnifyActiveUVName(Operator):
         self.Log(f"{cnt} objects' UV name unified to '{targetName}'")
         return{"FINISHED"}
 
+class F_OT_ClearTargetUVMap(Operator):
+    """Clear target uv map"""
+    bl_idname = "mesh.f_clear_target_uv_map"
+    bl_label = "Clear Target UV Map"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    target_uv_name: bpy.props.StringProperty(name= "Material Name", default="")# type:ignore
+
+    def execute(self, context):
+        
+        for o in bpy.context.selected_objects:
+            if ( self.target_uv_name in o.data.uv_layers.keys()):
+                target_uvlayer = o.data.uv_layers.get(self.target_uv_name)
+                o.data.uv_layers.remove(target_uvlayer)
+                ...
+            ...
+        self.Log("ClearUV")
+
+        return{"FINISHED"}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "target_uv_name", text="UV Name")
+    
 class F_OT_GetMeshMatchedObjects(Operator):
     """Match mesh from high or low model"""
     bl_idname = "mesh.f_get_mesh_matched_objects"
@@ -120,13 +148,13 @@ class F_OT_GetMeshMatchedObjects(Operator):
             # match sucess
             if matched_obj != None:
                 # report
-                self.Log(f"Success: matched {matched_obj.name}")
+                self.Log(f"Success: matched {obj.name}")
 
                 new_mesh = bpy.data.meshes.new_from_object(matched_obj, preserve_all_data_layers=True)
                 obj.data = new_mesh
 
             else:
-                self.Warning(f"Failed: matched {matched_obj.name}")
+                self.Warning(f"Failed: matched {obj.name}")
                 continue
 
             ...
@@ -140,4 +168,5 @@ _cls=[
     F_OT_BatchAddUVLayer,
     F_OT_GetMeshMatchedObjects,
     F_OT_UnifyActiveUVName,
+    F_OT_ClearTargetUVMap,
 ]
