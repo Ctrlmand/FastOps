@@ -16,7 +16,8 @@ def get_modifier_enum() -> EnumProperty:
             ('SHRINKWRAP', 'Shrinkwrap', ''),
             ('TRIANGULATE', 'Triangulate', ''),
             ('SIMPLE_DEFORM', 'Simple Deform', ''),
-
+            ('DECIMATE', 'Decimate', ''),
+            
             # OnlyRemoveOperator
             ('SUBSURF', 'Subsurf', ''),
             ('SIMPLE_DEFORM', 'SimpleDeform', ''),

@@ -59,9 +59,13 @@ class F_OT_GenerateBasicLOD(Operator):
         bpy.ops.object.duplicate()
         for var in bpy.context.selected_objects:
             var.name = re.sub(r"_LOD0\.\d+$", "_LOD1", var.name)
+            # context.view_layer.active_object = var
+            var.modifiers.new("Decimate", "DECIMATE")
+            var.modifiers[0].ratio = 0.5
         bpy.ops.object.duplicate()
         for var in bpy.context.selected_objects:
             var.name = re.sub(r"_LOD1\.\d+$", "_LOD2", var.name)
+            var.modifiers[0].ratio = 0.25
 
 
         return{'FINISHED'}
