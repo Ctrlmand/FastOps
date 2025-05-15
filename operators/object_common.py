@@ -45,6 +45,29 @@ class F_OT_ObjMoveToCollectionByName(Operator):
             obj.users_collection[0].objects.unlink(obj)
             bpy.data.collections[prefix].objects.link(obj)
         return{'FINISHED'}
+    
+class F_OT_GenerateBasicLOD(Operator):
+    """Auto Generate"""
+    bl_idname = "object.f_obj_generate_basic_lod"
+    bl_label = "Generate basic LOD"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        for var in bpy.context.selected_objects:
+            var.name = f"{var.name}_LOD0"
+        bpy.ops.object.duplicate()
+        for var in bpy.context.selected_objects:
+            var.name = re.sub(r"_LOD0\.\d+$", "_LOD1", var.name)
+        bpy.ops.object.duplicate()
+        for var in bpy.context.selected_objects:
+            var.name = re.sub(r"_LOD1\.\d+$", "_LOD2", var.name)
+
+
+        return{'FINISHED'}
+
 _cls=[
     F_OT_ObjMoveToCollectionByName,
+    F_OT_GenerateBasicLOD,
+
 ]
