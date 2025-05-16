@@ -161,6 +161,19 @@ class F_OT_GetMeshMatchedObjects(Operator):
         return {"FINISHED"}
     ...
 
+class F_OT_SelectMoreAndConvertToQuads(Operator):
+    """Select more and convert to quads"""
+    bl_idname = "mesh.f_select_more_and_convert_to_quads"
+    bl_label = "Select More And Convert To Quads"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.ops.mesh.select_more()
+        bpy.ops.mesh.tris_convert_to_quads(face_threshold=1.535111, shape_threshold=1.535111, topology_influence=2, uvs=True)
+
+        return {"FINISHED"}
+
+
 _cls=[
     F_OT_AddSplitNormal,
     F_OT_ClearSplitNormal,
@@ -169,4 +182,5 @@ _cls=[
     F_OT_GetMeshMatchedObjects,
     F_OT_UnifyActiveUVName,
     F_OT_ClearTargetUVMap,
+    F_OT_SelectMoreAndConvertToQuads,
 ]
