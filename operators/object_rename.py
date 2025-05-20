@@ -4,7 +4,7 @@ from typing import Any, Set
 from bpy.types import Context
 from ..utility.base_class import Operator
 from ..utility.debug import InfoOut, LabelOut, TitleOut
-from ..utility.varis import MESH
+from ..utility.global_variable import MESH
 
 # F_OT_ObjectBatchRename
 ## rename

@@ -4,7 +4,7 @@ from bpy.types import Context
 from ..utility.debug import P, InfoOut
 from ..utility.matching import MatchObjectByPrefix
 from ..utility.base_class import Operator
-from ..utility.varis import MESH
+from ..utility.global_variable import MESH
 
 class F_OT_AddSplitNormal(Operator):
     """Batch add split normal"""
@@ -113,11 +113,12 @@ class F_OT_ClearTargetUVMap(Operator):
     bl_label = "Clear Target UV Map"
     bl_options = {'REGISTER', 'UNDO'}
 
-    target_uv_name: bpy.props.StringProperty(name= "Material Name", default="")# type:ignore
+    target_uv_name: bpy.props.StringProperty(name= "UV Name", default="")# type:ignore
 
     def execute(self, context):
         
         for o in bpy.context.selected_objects:
+            if (o.type != MESH): continue
             if ( self.target_uv_name in o.data.uv_layers.keys()):
                 target_uvlayer = o.data.uv_layers.get(self.target_uv_name)
                 o.data.uv_layers.remove(target_uvlayer)
