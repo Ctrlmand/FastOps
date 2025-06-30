@@ -89,22 +89,27 @@ class F_OT_BatchAddUVLayer(Operator):
         layout = self.layout
         layout.prop(self, "uv_name", text="UV Name")
 
-class F_OT_UnifyActiveUVName(Operator):
-    """Unify active uv name"""
+class F_OT_UnifyUVName(Operator):
+    """Unify uv name"""
     bl_idname = "mesh.f_unify_active_uv_name"
     bl_label = "Unify Active UV Name"
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, contest):
-        targetName = "UVMap"
-        cnt=0
-        for obj in bpy.context.selected_objects:
-            if (obj.type == MESH):
-                uvName = obj.data.uv_layers.active.name
-                if (uvName != targetName):
-                    obj.data.uv_layers.active.name = targetName
-                    cnt += 1
+        ###
+        C = bpy.context
+        name0 = "UVMap.000"
+        name1 = "UVMap.001"
         
-        self.Log(f"{cnt} objects' UV name unified to '{targetName}'")
+        for obj in C.selected_objects:
+            uv_layer = obj.data.uv_layers
+            # layer 0
+            while (len(obj.data.uv_layers) < 2):
+                uv_layer.new(name = "NewLayer", do_init = True)  
+            uv_layer[0].name = name0
+            uv_layer[1].name = name1
+            uv_layer.active_index = 1
+        self.Log(f"Done!")
+        ###
         return{"FINISHED"}
 
 class F_OT_ClearTargetUVMap(Operator):
@@ -181,7 +186,7 @@ _cls=[
     F_OT_ClearSharp,
     F_OT_BatchAddUVLayer,
     F_OT_GetMeshMatchedObjects,
-    F_OT_UnifyActiveUVName,
+    F_OT_UnifyUVName,
     F_OT_ClearTargetUVMap,
     F_OT_SelectMoreAndConvertToQuads,
 ]

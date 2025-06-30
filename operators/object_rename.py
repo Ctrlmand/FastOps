@@ -35,7 +35,7 @@ class F_OT_ObjectBatchRename(Operator):
                 # 3.index offset
                 index += suffix_start
                 # 4.rename
-                obj.name = f"{prefix}_{index:>0{suffix_number}d}{suffix}"
+                obj.name = f"{prefix}.{index:>0{suffix_number}d}{suffix}"
                 count=index+1
                 ...
             # 5.report changed object's count
