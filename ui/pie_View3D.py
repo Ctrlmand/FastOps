@@ -1,5 +1,5 @@
 import bpy
-from ..operators import object_modifier, object_material, object_rename, object_select, node_mat, mesh
+from ..operators import object_modifier, object_material, object_rename, object_select, node_mat, mesh, scene
 
 class VIEW3D_MT_ModifierPieMenu(bpy.types.Menu):
     """Object Option Pie Menu"""
@@ -50,7 +50,7 @@ class VIEW3D_MT_AlternatePieMenu(bpy.types.Menu):
         pie.operator(object_material.F_OT_SetNoneMaterial.bl_idname, text="Flood Empty Material", icon="SHADING_RENDERED")
         
         ## Right
-        pie.operator(object_rename.F_OT_RenameByActiveMaterialName.bl_idname, text="Rename By Active Material Name", icon="OUTLINER_OB_MESH")
+        pie.operator(scene.F_OT_ExportFBX.bl_idname, text="Quick Export", icon="EXPORT")
 
         ## Down
         col = pie.split().box().column()
@@ -58,8 +58,12 @@ class VIEW3D_MT_AlternatePieMenu(bpy.types.Menu):
         col.operator(mesh.F_OT_BatchAddUVLayer.bl_idname, text="Add UV Layer", icon="GROUP_UVS")
         col.operator(mesh.F_OT_UnifyUVName.bl_idname, text="Unify UV Name", icon="UV_SYNC_SELECT")
         col.operator(mesh.F_OT_ClearTargetUVMap.bl_idname, text="Clear Target UVLayer", icon="UV")
-        
 
+        col.split()
+        col.label(text="Rename")
+        col.operator(object_rename.F_OT_RenameByActiveMaterialName.bl_idname, text="Rename By Active Material Name", icon="OUTLINER_OB_MESH")
+
+        
 
         ## Up
         pie.operator(object_select.F_OT_SelectObjectByMaterial.bl_idname, text="Select By Material", icon="MATERIAL_DATA")
