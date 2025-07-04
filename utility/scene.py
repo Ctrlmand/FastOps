@@ -5,8 +5,8 @@ from pathlib import Path
 
 class FileExport:
     @staticmethod
-    def ExportFBX(self: Operator, folder_path: str, file_name: str):
-
+    def ExportFBX(self: Operator, folder_path: str, file_name: str, batch_mode: str | None = "OFF"):
+        
         Path(folder_path).mkdir(parents = True, exist_ok =True)
 
         target_file_path = f'{folder_path}\\{file_name}.fbx'
@@ -48,8 +48,8 @@ class FileExport:
             bake_anim_simplify_factor=1.0,
             path_mode='AUTO',
             embed_textures=False,
-            batch_mode='OFF',
-            use_batch_own_dir=True,
+            batch_mode=batch_mode, # 'OFF', 'SCENE', 'COLLECTION', 'SCENE_COLLECTION', 'ACTIVE_SCENE_COLLECTION'
+            use_batch_own_dir=False,
             use_metadata=True,
             axis_forward='Y',
             axis_up='Z'
