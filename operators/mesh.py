@@ -141,6 +141,35 @@ class F_OT_ClearTargetUVMap(Operator):
         layout = self.layout
         layout.prop(self, "target_uv_name", text="UV Name")
     
+class F_OT_SwitchUV(Operator):
+    """Switch UV Map"""
+    bl_idname = "mesh.f_switch_uv_map"
+    bl_label = "Switch UV Map"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    target_index: bpy.props.IntProperty(name= "UV Index", default=0)# type:ignore
+
+    def execute(self, context):
+        
+        for obj in bpy.context.selected_objects:
+            data = obj.data
+            if (obj.type != MESH): continue
+            if (self.target_index < len(data.uv_layers)):
+                data.uv_layers.active_index = self.target_index
+                ...
+            ...
+        self.Log("Done!")
+
+        return{"FINISHED"}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "target_index", text="UV Index")
+
 class F_OT_GetMeshMatchedObjects(Operator):
     """Match mesh from high or low model"""
     bl_idname = "mesh.f_get_mesh_matched_objects"
@@ -179,6 +208,31 @@ class F_OT_SelectMoreAndConvertToQuads(Operator):
 
         return {"FINISHED"}
 
+class F_OT_ClearTargetAttribute(Operator):
+    """Clear target attribute"""
+    bl_idname = "mesh.f_clear_target_attribute"
+    bl_label = "Clear Target Attribute"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    target_attribute_name: bpy.props.StringProperty(name= "Attribute Name", default="")# type:ignore
+
+    def execute(self, context):
+        for obj in bpy.context.selected_objects:
+            attributes = obj.data.attributes
+            if "sharp_face" in obj.data.attributes.keys():
+                attributes.remove(attributes['sharp_face'])
+
+
+        self.Log("Done!")
+        return {"FINISHED"}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "target_attribute_name", text="Attribute Name")
 
 _cls=[
     F_OT_AddSplitNormal,
@@ -189,4 +243,6 @@ _cls=[
     F_OT_UnifyUVName,
     F_OT_ClearTargetUVMap,
     F_OT_SelectMoreAndConvertToQuads,
+    F_OT_SwitchUV,
+    F_OT_ClearTargetAttribute,
 ]

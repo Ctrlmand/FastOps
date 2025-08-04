@@ -58,12 +58,15 @@ class VIEW3D_MT_AlternatePieMenu(bpy.types.Menu):
         col.operator(mesh.F_OT_BatchAddUVLayer.bl_idname, text="Add UV Layer", icon="GROUP_UVS")
         col.operator(mesh.F_OT_UnifyUVName.bl_idname, text="Unify UV Name", icon="UV_SYNC_SELECT")
         col.operator(mesh.F_OT_ClearTargetUVMap.bl_idname, text="Clear Target UVLayer", icon="UV")
+        col.operator(mesh.F_OT_SwitchUV.bl_idname, text="Switch UVLayer", icon="MOD_UVPROJECT")
 
         col.split()
         col.label(text="Rename")
         col.operator(object_rename.F_OT_RenameByActiveMaterialName.bl_idname, text="Rename By Active Material Name", icon="OUTLINER_OB_MESH")
 
-        
+        col.split()
+        col.label(text="Attribute")
+        col.operator(mesh.F_OT_ClearTargetAttribute.bl_idname, text="Clear Target Attribute", icon="TRASH")
 
         ## Up
         pie.operator(object_select.F_OT_SelectObjectByMaterial.bl_idname, text="Select By Material", icon="MATERIAL_DATA")
