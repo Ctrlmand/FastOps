@@ -16,10 +16,11 @@ class F_OT_SwitchColorSpace(Operator):
         description = "Image Color Space",
         default = 'Utility - Raw',
         items =(
-            ('Utility - Raw', 'Raw', 'Set Space As Raw'),
-            ('Utility - sRGB - Texture', 'sRGB', 'Set Space As sRGB'),
-            ('Utility - Rec.709 - Display', 'Rec.709', 'Set Space As Rec.709'),
-            ('Utility - Rec.2020 - Display', 'Rec.2020', 'Set Space As Rec.2020'),
+            ('Utility - Raw', 'Raw', ''),
+            ('Utility - sRGB - Texture', 'sRGB', ''),
+            ('None-Color', 'None Color', ''),
+            ('ACES 2.0 sRGB', 'sRGB', ''),
+
         )
     ) # type: ignore
 
@@ -38,23 +39,6 @@ class F_OT_SwitchColorSpace(Operator):
             self.Log(f"{sucess_count} nodes sucessfully changed, {fail_count} nodes failed")
         else:
             self.Warning(f"no texture nodes found")
-        return {'FINISHED'}
-
-class F_OT_SetColorTexBySuffix(Operator):
-    """Set Color Space By Suffix"""
-    bl_idname = "node.f_set_color_tex_by_suffix"
-    bl_label = "Set Color Space By Suffix"
-    bl_options = {'REGISTER', "UNDO"}
-    def execute(self, context: Context):
-        suffixes_to_check = ['_BaseColor', '_Albedo', '_Color', '_Emissive', '_Emiss']
-        for img in bpy.data.images:
-            # is color tex
-            if any(suffix in img.name for suffix in suffixes_to_check):
-                img.colorspace_settings.name = 'Utility - sRGB - Texture'
-                # report img name that was changed
-                # self.Log(f"{img.name}")
-            else:
-                img.colorspace_settings.name = 'Utility - Raw'
         return {'FINISHED'}
 
 class F_OT_ReportSelectedTextureNodeName(Operator):
@@ -231,7 +215,6 @@ class F_OT_FindMaterialByTextureNode(Operator):
 
 _cls=[
     F_OT_SwitchColorSpace,
-    F_OT_SetColorTexBySuffix,
     F_OT_ReportSelectedTextureNodeName,
     F_OT_ImageNodeMergeRGBAndAlpha,
     F_OT_FindMaterialByTextureNode,

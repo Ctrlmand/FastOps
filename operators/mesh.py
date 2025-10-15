@@ -218,9 +218,10 @@ class F_OT_ClearTargetAttribute(Operator):
 
     def execute(self, context):
         for obj in bpy.context.selected_objects:
+            if (obj.type != MESH): continue
             attributes = obj.data.attributes
-            if "sharp_face" in obj.data.attributes.keys():
-                attributes.remove(attributes['sharp_face'])
+            if self.target_attribute_name in obj.data.attributes.keys():
+                attributes.remove(attributes[self.target_attribute_name])
 
 
         self.Log("Done!")
