@@ -26,8 +26,8 @@ class FASTOPS_MT_NodeOptionPieMenu(bpy.types.Menu):
             col = pie.split().box().column()
             col.label(text="Set Color Space")
             row = col.row(align=True)
-            row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="ACES 2.0 sRGB").colorspace = 'Utility - sRGB - Texture'
-            row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="None-Color").colorspace = 'Utility - Raw'
+            row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="ACES 2.0 sRGB").colorspace = 'ACES 2.0 sRGB'
+            row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="None-Color").colorspace = 'None-Color'
 
             ## Up
             pie.operator(window_switch_ui_type.F_OT_SwitchUiType.bl_idname, text="Geometry Node Tree", icon="NODETREE").ui_type = "GeometryNodeTree"

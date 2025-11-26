@@ -15,24 +15,15 @@ class FASTOPS_UI_PT_Node_SetColorSpace(bpy.types.Panel):
         box = layout.box()
         box.label(text="Tex")
         row = box.row(align=True)
-        row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="sRBG").colorspace = "Utility - sRGB - Texture"
-        row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="Raw").colorspace = "Utility - Raw"
-        
-        row = box.row()
-        row.operator(node_mat.F_OT_SetColorTexBySuffix.bl_idname, text="Set By Suffix")
-        
-        #Display
-        box = layout.box()
-        box.label(text="Display")
-        row = box.row(align=True)
-        row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="Rec709").colorspace = 'Utility - Rec.709 - Display'
-        row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="Rec2020").colorspace = 'Utility - Rec.2020 - Display'
+        row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="ACES 2.0 sRGB").colorspace = "ACES 2.0 sRGB"
+        row.operator(node_mat.F_OT_SwitchColorSpace.bl_idname, text="Non-Color").colorspace = "Non-Color"
+               
 # Merge Tex Panel
 class FASTOPS_UI_PT_NodeOptionPanel(bpy.types.Panel):
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
     bl_category = "FastOps"
-    bl_label = "Node Optiond"
+    bl_label = "Node Options"
     def draw(self, context):
         layout = self.layout
         

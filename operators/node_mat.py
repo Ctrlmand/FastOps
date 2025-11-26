@@ -14,12 +14,11 @@ class F_OT_SwitchColorSpace(Operator):
     colorspace: bpy.props.EnumProperty(
         name = "Image Color Space",
         description = "Image Color Space",
-        default = 'Utility - Raw',
+        default = 'Non-Color',
         items =(
-            ('Utility - Raw', 'Raw', ''),
-            ('Utility - sRGB - Texture', 'sRGB', ''),
-            ('None-Color', 'None Color', ''),
-            ('ACES 2.0 sRGB', 'sRGB', ''),
+            ('Non-Color', 'Non-Color', ''),
+            ('sRGB', 'sRGB', ''),
+            ('ACES 2.0 sRGB', 'ACES 2.0 sRGB', ''),
 
         )
     ) # type: ignore
