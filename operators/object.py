@@ -2,7 +2,7 @@ from typing import Set
 import bpy
 import re
 from bpy.types import Context
-from ..utility.base_class import Operator
+from ..function.classes import Operator
 
 
 class F_OT_ObjMoveToCollectionByName(Operator):

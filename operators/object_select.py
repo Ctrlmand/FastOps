@@ -1,11 +1,9 @@
-from typing import Set
 import bpy
 import re
 from bpy.types import Context
 from typing import Union
-from ..utility.debug import P, InfoOut
-from ..utility.base_class import Operator
-from ..utility.global_variable import *
+from ..function.debug import PrintColored, PrintInfo
+from ..function.classes import Operator
 
 
 class F_OT_SelectObjectByName(Operator):
@@ -17,12 +15,11 @@ class F_OT_SelectObjectByName(Operator):
     select_method: bpy.props.EnumProperty( # type: ignore
         name="Select Method",
         items=[
-            (PREF, "Prefix", ''),
-            (SUFF, "Suffix", ''),
+            ('prefix', "Prefix", ''),
+            ('suffix', "Suffix", ''),
         ],
         default='prefix'
     )
-
 
     def MatchName(self, name: str):
         """"match"""
@@ -44,35 +41,35 @@ class F_OT_SelectObjectByName(Operator):
             self.Error("No Objects Selected")
             return {'CANCELLED'}
         # make sure is right value
-        if method not in [PREF, SUFF]:
+        if method not in ['prefix', 'suffix']:
 
             self.Error(f"Invalid Type, type is{method}")
             return {'CANCELLED'}
 
 
-        if method == PREF:
+        if method == 'prefix':
             target_name = str()
             for obj in selected_objs:
                 match = self.MatchName(obj.name)
                 # part
 
-                part_prefix = match.group(PREF)
-                part_suffix = match.group(SUFF)
+                part_prefix = match.group('prefix')
+                part_suffix = match.group('suffix')
 
                 # low or high
-                if part_suffix == LOW:
-                    target_name = part_prefix + '_' + HIGH
-                elif part_suffix == HIGH:
-                    target_name = part_prefix + '_' + LOW
+                if part_suffix == 'low':
+                    target_name = part_prefix + '_' + 'high'
+                elif part_suffix == 'high':
+                    target_name = part_prefix + '_' + 'low'
                 resault_list.append(target_name)
             ...
-        elif method == SUFF:
+        elif method == 'suffix':
             suffix_list = []
             # get all suffix
             for obj in selected_objs:
                 
                 match = self.MatchName(obj.name)
-                part_suffix = match.group(SUFF)
+                part_suffix = match.group('suffix')
                 suffix_list.append('_' + part_suffix)
             # find in data
             for obj in data_objs:
@@ -94,7 +91,7 @@ class F_OT_SelectObjectByName(Operator):
         if obj_list == {'CANCELLED'}:
             return {'CANCELLED'}
         # debug
-        InfoOut(f"{obj_list}")
+        PrintInfo(f"{obj_list}")
 
         # select!!!
         for name in obj_list:
@@ -131,13 +128,13 @@ class F_OT_SelectObjectByMaterial(Operator):
         for obj in obj_data:
             mat_index = obj.material_slots.find(self.material_name)
             if mat_index == -1:
-                InfoOut(f"{obj.name} Not In View Layer")
+                PrintInfo(f"{obj.name} Not In View Layer")
                 continue
             else:
-                InfoOut(f"{obj.name}:Material Exist")
+                PrintInfo(f"{obj.name}:Material Exist")
                 last_obj=obj
                 if context.view_layer.objects.get(obj.name) != None:
-                    InfoOut(f"{obj.name} In View Layer")
+                    PrintInfo(f"{obj.name} In View Layer")
                     obj.select_set(True)
                     count+=1
                 ...
@@ -275,8 +272,8 @@ class F_OT_SelectByModifier(bpy.types.Operator):
         self.Log(f"{len(resault_list)} Objects Selected")
 
         # Debug
-        P(94, f"Selected List:")
-        P(93, f"{resault_list}")
+        PrintColored(94, f"Selected List:")
+        PrintColored(93, f"{resault_list}")
 
     @classmethod
     def find_key_in_list(self, modifier: Union[list, str], ineration_obj: bpy.types.bpy_prop_collection, resault_list: list, is_enum: bool = False):

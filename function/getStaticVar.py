@@ -2,6 +2,7 @@
 
 from bpy.props import EnumProperty
 
+@staticmethod
 def get_modifier_enum() -> EnumProperty:
     return EnumProperty(
         name="Modifier Type",

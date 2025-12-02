@@ -1,10 +1,8 @@
 import bpy
 import re
-from typing import Any, Set
 from bpy.types import Context
-from ..utility.base_class import Operator
-from ..utility.debug import InfoOut, LabelOut, TitleOut
-from ..utility.global_variable import MESH
+from ..function.classes import Operator
+from ..function.debug import PrintInfo, PrintLabel, PrintTitle
 
 # F_OT_ObjectBatchRename
 ## rename
@@ -54,30 +52,7 @@ class F_OT_ObjectBatchRename(Operator):
         bpy.ops.object.f_set_mesh_name()
         return {'FINISHED'}
 
-class F_OT_SetMeshName(Operator):
-    """Set Mesh Name"""
-    bl_idname = "object.f_set_mesh_name"
-    bl_label = "Set Mesh Name"
-    bl_options = {'REGISTER', 'UNDO'}
-    def execute(self, context: Context):
-        # alias
-        object = context.selected_objects
-        # count
-        cout=0
-        empty_cout=0
-        # 1.set mesh name
-        for obj in object:
-            # 2.ignore empty object
-            if obj.type == "EMPTY":
-                empty_cout+=1
-                continue
-            # 3.set name
-            obj.data.name = obj.name
-            cout+=1
-            ...
-        # 4.report changed object's count
-        self.Log(f"{cout} mesh changed,{empty_cout} objects ignored")
-        return {'FINISHED'}
+
 
 # F_OT_FindAndReplace
 bpy.types.Scene.FastOpsObjectBatchRename_find = bpy.props.StringProperty(name= "F_Rename_Object Find", default= "")
@@ -154,7 +129,7 @@ class F_OT_RenameByActiveMaterialName(Operator):
         # 8.rename object
         # mat
         for mat_name in mat_name_set:
-            TitleOut(mat_name)          
+            PrintTitle(mat_name)          
             # start with each mat
             name_count=suffix_start 
 
@@ -164,14 +139,14 @@ class F_OT_RenameByActiveMaterialName(Operator):
                 if not obj_name in bpy.data.objects.keys():
                     continue
                 obj = bpy.data.objects.get(obj_name)
-                if obj.type != MESH:
+                if obj.type != 'MESH':
                     continue
 
                 # obj active_mat is mat 
                 if mat_name == obj.active_material.name:
                     # obj's mat has only one user
                     if bpy.data.materials.get(mat_name).users == 1:
-                        LabelOut("Only One User")
+                        PrintLabel("Only One User")
                         obj.name = mat_name
                         changed_count+=1
                         break
@@ -239,7 +214,6 @@ class F_OT_EditMaterialNameInSelectedObjects(Operator):
 
 _cls=[
     F_OT_ObjectBatchRename,
-    F_OT_SetMeshName,
     F_OT_FindAndReplace,
     F_OT_RenameByActiveMaterialName,
     F_OT_EditMaterialNameInSelectedObjects,

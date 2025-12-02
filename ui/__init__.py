@@ -1,8 +1,6 @@
 import os
 import importlib
-import importlib.util
-from ..utility import register_list
-from ..utility.debug import P
+from ..function import utils
 
 # import submod
 correct_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +17,6 @@ for mod in submod:
 
 # Register Function
 def register():
-    register_list.Register("UI", _modcls)
+    utils.Register("UI", _modcls)
 def unregister():
-    register_list.Unregister("UI", _modcls)
+    utils.Unregister("UI", _modcls)

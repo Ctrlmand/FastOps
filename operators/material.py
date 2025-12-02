@@ -1,7 +1,7 @@
 from typing import Any
 import bpy
 from bpy.types import Context
-from ..utility.base_class import Operator
+from ..function.classes import Operator
 
 class F_OT_SetAllObjMatID(Operator):
     """Set all object's and material's pass id"""
@@ -24,10 +24,10 @@ class F_OT_SetAllObjMatID(Operator):
         ###End of Set All Object Material Pass ID
         return {'FINISHED'}
     
-class F_OT_SetNoneMaterial(Operator):
-    """Set None Material"""
-    bl_idname = "object.f_set_none_material"
-    bl_label = "Set None Material"
+class F_OT_SetDefaultMaterial(Operator):
+    """Set Default Material"""
+    bl_idname = "object.f_set_default_material"
+    bl_label = "Set Default Material"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context: Context | Any) -> Context | Any:
@@ -48,6 +48,6 @@ class F_OT_SetNoneMaterial(Operator):
         return {'FINISHED'}
 
 _cls=[
-    F_OT_SetNoneMaterial,
+    F_OT_SetDefaultMaterial,
     F_OT_SetAllObjMatID,
 ]

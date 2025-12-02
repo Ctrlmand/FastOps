@@ -1,5 +1,5 @@
 import bpy
-from ..operators import object_material
+from ..operators import material
 
 # Set Pass Panel
 class FASTOPS_PT_SetPassIdSideBar(bpy.types.Panel):
@@ -13,7 +13,7 @@ class FASTOPS_PT_SetPassIdSideBar(bpy.types.Panel):
         box = layout.box()
         box.label(text="Set Pass Index")
         row = box.row()
-        row.operator(object_material.F_OT_SetAllObjMatID.bl_idname, text="Set Pass ID")
+        row.operator(material.F_OT_SetAllObjMatID.bl_idname, text="Set Pass ID")
 
 _cls=[
     FASTOPS_PT_SetPassIdSideBar,

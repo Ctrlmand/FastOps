@@ -1,5 +1,5 @@
 import bpy
-from .base_class import Operator
+from .classes import Operator
 from pathlib import Path
 
 

@@ -1,10 +1,7 @@
-from typing import Any, Set
 import bpy
 from bpy.types import Context
-from ..utility.debug import P, InfoOut
-from ..utility.matching import MatchObjectByPrefix
-from ..utility.base_class import Operator
-from ..utility.global_variable import MESH
+from ..function.matching import MatchObjectByPrefix
+from ..function.classes import Operator
 
 class F_OT_AddSplitNormal(Operator):
     """Batch add split normal"""
@@ -123,7 +120,7 @@ class F_OT_ClearTargetUVMap(Operator):
     def execute(self, context):
         
         for o in bpy.context.selected_objects:
-            if (o.type != MESH): continue
+            if (o.type != 'MESH'): continue
             if ( self.target_uv_name in o.data.uv_layers.keys()):
                 target_uvlayer = o.data.uv_layers.get(self.target_uv_name)
                 o.data.uv_layers.remove(target_uvlayer)
@@ -153,7 +150,7 @@ class F_OT_SwitchUV(Operator):
         
         for obj in bpy.context.selected_objects:
             data = obj.data
-            if (obj.type != MESH): continue
+            if (obj.type != 'MESH'): continue
             if (self.target_index < len(data.uv_layers)):
                 data.uv_layers.active_index = self.target_index
                 ...
@@ -218,7 +215,7 @@ class F_OT_ClearTargetAttribute(Operator):
 
     def execute(self, context):
         for obj in bpy.context.selected_objects:
-            if (obj.type != MESH): continue
+            if (obj.type != 'MESH'): continue
             attributes = obj.data.attributes
             if self.target_attribute_name in obj.data.attributes.keys():
                 attributes.remove(attributes[self.target_attribute_name])
@@ -235,6 +232,31 @@ class F_OT_ClearTargetAttribute(Operator):
         layout = self.layout
         layout.prop(self, "target_attribute_name", text="Attribute Name")
 
+class F_OT_SetMeshName(Operator):
+    """Set Mesh Name"""
+    bl_idname = "object.f_set_mesh_name"
+    bl_label = "Set Mesh Name"
+    bl_options = {'REGISTER', 'UNDO'}
+    def execute(self, context: Context):
+        # alias
+        object = context.selected_objects
+        # count
+        cout=0
+        empty_cout=0
+        # 1.set mesh name
+        for obj in object:
+            # 2.ignore empty object
+            if obj.type == "EMPTY":
+                empty_cout+=1
+                continue
+            # 3.set name
+            obj.data.name = obj.name
+            cout+=1
+            ...
+        # 4.report changed object's count
+        self.Log(f"{cout} mesh changed,{empty_cout} objects ignored")
+        return {'FINISHED'}
+
 _cls=[
     F_OT_AddSplitNormal,
     F_OT_ClearSplitNormal,
@@ -246,4 +268,5 @@ _cls=[
     F_OT_SelectMoreAndConvertToQuads,
     F_OT_SwitchUV,
     F_OT_ClearTargetAttribute,
+    F_OT_SetMeshName,
 ]

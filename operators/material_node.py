@@ -1,8 +1,8 @@
 from typing import Any, Set
 import bpy
 from bpy.types import Context
-from ..utility.base_class import Operator
-from ..utility.debug import InfoOut, LabelOut, TitleOut
+from ..function.classes import Operator
+from ..function.debug import PrintInfo, PrintLabel, PrintTitle
 
 class F_OT_SwitchColorSpace(Operator):
     """Switch Textures Color Space"""
@@ -127,7 +127,7 @@ class F_OT_FindMaterialByTextureNode(Operator):
 
     def execute(self, conxtex):
         # debug
-        TitleOut("Find Material By Texture Node")
+        PrintTitle("Find Material By Texture Node")
 
         IMAGE_TEXTURE = 'Image Texture'
         TEX_IMAGE = 'TEX_IMAGE'
@@ -137,7 +137,7 @@ class F_OT_FindMaterialByTextureNode(Operator):
 
         # traverse data to find material that has target texture node 
         for material in bpy.data.materials:
-            TitleOut(f"\tMaterial: {material.name}")
+            PrintTitle(f"\tMaterial: {material.name}")
 
             # material has no node tree
             if not material.use_nodes:
@@ -152,11 +152,11 @@ class F_OT_FindMaterialByTextureNode(Operator):
                 for node in node_tree.nodes.values():
                     # if node's type same as target type
                     if node.type == TEX_IMAGE and node.image != None:
-                        LabelOut(f"\t\t{node.image.name}")
+                        PrintLabel(f"\t\t{node.image.name}")
                         # if node's name same as target name
                         if node.image.name == self.image_name:
                             mat_temp.append(material.name)
-                            InfoOut(f"\t\t\tHas Target Texture")
+                            PrintInfo(f"\t\t\tHas Target Texture")
                             break
                     else:
                         continue

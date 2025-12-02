@@ -3,9 +3,9 @@ import bpy
 import math
 from mathutils import Vector
 from bpy.types import Context
-from ..utility.base_class import Operator
-from ..utility.debug import P
-from ..utility import props
+from ..function.classes import Operator
+from ..function.debug import PrintColored
+from ..function import getStaticVar
 
 class F_OT_AddModifier(Operator):
     """Batch Add Modifier To Selected Objects"""
@@ -14,7 +14,7 @@ class F_OT_AddModifier(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     # Variables
     # enum property
-    modifier_type: props.get_modifier_enum() # type: ignore
+    modifier_type: getStaticVar.get_modifier_enum() # type: ignore
 
     # Bevel
     bevel_affect: bpy.props.EnumProperty( # type: ignore
@@ -159,8 +159,8 @@ class F_OT_AddModifier(Operator):
                     tmp_list.remove(active_object)
                     mirror_obj = tmp_list[0]
                     # debug
-                    P(31, f"active object:{active_object.name}")
-                    P(31, f"another object:{mirror_obj.name}")
+                    PrintColored(31, f"active object:{active_object.name}")
+                    PrintColored(31, f"another object:{mirror_obj.name}")
                     # set
                     mod.mirror_object = mirror_obj
                     
@@ -425,7 +425,7 @@ class F_OT_RemoveModifier(Operator):
     bl_option = {'REGISTER', 'UNDO'}
     
     use_input_key: bpy.props.BoolProperty(name="Input Key", default=False) # type: ignore
-    modifier_key: props.get_modifier_enum() # type: ignore
+    modifier_key: getStaticVar.get_modifier_enum() # type: ignore
     input_modifier_name: bpy.props.StringProperty(name="Modifier Name", default="") # type: ignore
     
 
@@ -435,7 +435,7 @@ class F_OT_RemoveModifier(Operator):
         
         for obj in context.selected_objects:
             if modifier_key in obj.modifiers.keys():
-                P(f"{modifier_key} in {obj.name}")
+                PrintColored(f"{modifier_key} in {obj.name}")
                 modifier = obj.modifiers.get(modifier_key)
                 obj.modifiers.remove(modifier)
 
@@ -447,7 +447,7 @@ class F_OT_RemoveModifier(Operator):
             self.Log("Sucess")
         else:
             self.Warning(f"{len(ignore_list)} objects not have modifier >>{modifier_key}<<")
-            P(33, f"{ignore_list}")
+            PrintColored(33, f"{ignore_list}")
         return {"FINISHED"}
 
     def draw(self, context):

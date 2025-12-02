@@ -1,10 +1,10 @@
 import os
 import importlib
 from bpy.types import Context
-from .. import utility
-from ..utility.base_class import Operator
-from ..utility.debug import P, InfoOut
-from ..utility import props
+from .. import function
+from ..function.classes import Operator
+from ..function.debug import PrintInfo
+from ..function import getStaticVar
 
 import bpy
 # ------------------------------------------------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ class F_OT_TEST(Operator):
     bl_label = "Test"
     bl_options = {'REGISTER', 'UNDO'}
 
-    info: props.get_modifier_enum() # type: ignore
+    info: getStaticVar.get_modifier_enum() # type: ignore
 
     def execute(self, context: Context):
         # i = 0
@@ -39,14 +39,14 @@ class F_OT_TEST(Operator):
         # self.Warning("Warning")
         # self.Error("Error")
 
-        InfoOut(bpy.data.meshes[1].name)
+        PrintInfo(bpy.data.meshes[1].name)
         return {'FINISHED'}
 
 
 _modcls+=[F_OT_TEST]
 
-# Register Functin
+# Register Functions
 def register():
-    utility.register_list.Register("OT", _modcls)
+    function.utils.Register("OT", _modcls)
 def unregister():
-    utility.register_list.Unregister("OT", _modcls)
+    function.utils.Unregister("OT", _modcls)

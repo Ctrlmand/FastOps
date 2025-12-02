@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Context
-from ..utility.base_class import Operator
+from ..function.classes import Operator
 
 
 class F_OT_Check_Ui_Type(Operator):

@@ -1,6 +1,5 @@
-from typing import Any
 import bpy
-from ..utility.base_class import Operator
+from ..function.classes import Operator
 from bpy.types import Context
 
 class F_OT_ImageChannelSet(Operator):

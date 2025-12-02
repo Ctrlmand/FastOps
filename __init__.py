@@ -13,7 +13,7 @@ import bpy
 from . import operators
 from . import ui
 from . import keymap
-from .utility.debug import P
+from .function.debug import PrintColored
 # operator list
 _cls = operators._modcls + ui._modcls
 classes = _cls
@@ -29,9 +29,9 @@ def register():
     keymap.km_handle.register()
 
     # No error
-    P(31, "-------")
-    P(31, "| End |")
-    P(31, "-------")
+    PrintColored(31, "-------")
+    PrintColored(31, "| End |")
+    PrintColored(31, "-------")
     
 def unregister():
     # UnRegister Operator
