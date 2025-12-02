@@ -1,5 +1,10 @@
+import bpy
 from bpy import utils
 from .debug import PrintColored, LogRow
+
+
+def get_ntree() -> bpy.types.NodeTree:
+    return bpy.context.space_data.edit_tree  # type: ignore
 
 # Register A List Of Class
 def Register(label: str, class_list: list) -> None:

@@ -8,7 +8,7 @@ class FASTOPS_MT_NodeOptionPieMenu(bpy.types.Menu):
     bl_label = "Node Option"
     def draw(self, context):
         # In Shader Editor
-        if bpy.context.area.ui_type == 'ShaderNodeTree':
+        if context.area.ui_type == 'ShaderNodeTree':
             layout = self.layout
             pie = layout.menu_pie()
 
@@ -44,7 +44,7 @@ class FASTOPS_MT_NodeOptionPieMenu(bpy.types.Menu):
             ## Right Down
             pie.operator(material_node.F_OT_SwitchColorSpace.bl_idname, text="\\")
                         
-        if bpy.context.area.ui_type == 'GeometryNodeTree':
+        if context.area.ui_type == 'GeometryNodeTree':
             layout = self.layout
             pie = layout.menu_pie()
 
@@ -72,7 +72,7 @@ class FASTOPS_MT_NodeOptionPieMenu(bpy.types.Menu):
             ## Right Down
             pie.operator(switch_ui_type.F_OT_SwitchUiType.bl_idname, text="\\", icon="NODETREE")
             ...
-        if bpy.context.area.ui_type == 'CompositorNodeTree':
+        if context.area.ui_type == 'CompositorNodeTree':
             layout = self.layout
             pie = layout.menu_pie()
 

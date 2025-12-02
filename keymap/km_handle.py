@@ -43,7 +43,7 @@ def register():
     # >> Node Option KM << 
     km_node_editor = wm.keyconfigs.addon.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
 
-    kmi_node_editor_call_menu_pie = km_node_editor.keymap_items.new('wm.call_menu_pie', 'F', 'PRESS', ctrl=False, shift=False, alt=False)
+    kmi_node_editor_call_menu_pie = km_node_editor.keymap_items.new('wm.call_menu_pie', 'F', 'PRESS', ctrl=False, shift=True, alt=False)
     kmi_node_editor_call_menu_pie.properties.name = ui.nodeEditor_pie.FASTOPS_MT_NodeOptionPieMenu.bl_idname
 
     ## append to km
