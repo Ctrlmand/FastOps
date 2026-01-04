@@ -2,14 +2,17 @@ import bpy
 from .classes import Operator
 from pathlib import Path
 
-
 class FileExport:
     @staticmethod
     def ExportFBX(self: Operator, folder_path: str, file_name: str, batch_mode: str | None = "OFF"):
         
         Path(folder_path).mkdir(parents = True, exist_ok =True)
 
-        target_file_path = f'{folder_path}\\{file_name}.fbx'
+        target_file_path = f'{folder_path}\\{file_name}'
+
+        if (batch_mode == 'OFF'):
+            target_file_path += '.fbx'
+            ...
 
         bpy.ops.export_scene.fbx(
             filepath= target_file_path,
@@ -56,4 +59,3 @@ class FileExport:
         )
         
         self.Log("Export Finished")
-            

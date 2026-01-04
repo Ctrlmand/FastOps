@@ -1,6 +1,7 @@
 import bpy
 from ..function.classes import Operator
-from ..function.export import FileExport
+from ..function.export import *
+from ..function.debug import *
 
 class F_OT_ExportFBX(Operator):
     """Export FBX"""
@@ -8,7 +9,7 @@ class F_OT_ExportFBX(Operator):
     bl_label = "Export FBX"
     bl_options = {'REGISTER', 'UNDO'}
     
-    batch_export: bpy.props.EnumProperty(
+    batch_mode: bpy.props.EnumProperty(
         name = "Batch Export Mode",
         description = "Way To Batch Export",
         default = 'OFF',
@@ -24,11 +25,11 @@ class F_OT_ExportFBX(Operator):
     ) # type: ignore
 # 'OFF', 'SCENE', 'COLLECTION', 'SCENE_COLLECTION', 'ACTIVE_SCENE_COLLECTION'
     def execute(self, context):
-        folder = "C:\\BlenderExport"
-
-        if self.CurrentFileName():
-            FileExport.ExportFBX(self, folder_path = folder, file_name= self.CurrentFileName(), batch_mode=self.batch_export)
+        folderPath = bpy.path.abspath("//Export")
         
+        
+        if self.CurrentFileName():
+            FileExport.ExportFBX(self, folder_path = folderPath, file_name= self.CurrentFileName(), batch_mode=self.batch_mode)
         return{'FINISHED'}
         ...
 
@@ -41,7 +42,7 @@ class F_OT_ExportFBX(Operator):
         
         col=layout.column()
         row = col.row()
-        row.prop(self, "batch_export", text="Batch Mode")
+        row.prop(self, "batch_mode", text="Batch Mode")
         ...
 
 _cls=[
