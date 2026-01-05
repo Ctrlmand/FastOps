@@ -12,7 +12,7 @@ class F_OT_ExportFBX(Operator):
     batch_mode: bpy.props.EnumProperty(
         name = "Batch Export Mode",
         description = "Way To Batch Export",
-        default = 'OFF',
+        default = 'COLLECTION',
         items =(
             # ('Value', 'Description', 'Tooltip')
             ('OFF', 'Off', 'Set Red Channel'),
@@ -23,20 +23,23 @@ class F_OT_ExportFBX(Operator):
             
         )
     ) # type: ignore
-# 'OFF', 'SCENE', 'COLLECTION', 'SCENE_COLLECTION', 'ACTIVE_SCENE_COLLECTION'
+
+    directory : bpy.props.StringProperty(subtype='DIR_PATH') #type: ignore
     def execute(self, context):
-        folderPath = bpy.path.abspath("//Export")
-        
+        # folderPath = bpy.path.abspath("//Export")
+        folderPath = self.directory
         
         if self.CurrentFileName():
-            FileExport.ExportFBX(self, folder_path = folderPath, file_name= self.CurrentFileName(), batch_mode=self.batch_mode)
-        return{'FINISHED'}
+            FileExport.ExportFBX(self, folder_path=folderPath, file_name=self.CurrentFileName(), batch_mode=self.batch_mode)
+        return {'FINISHED'}
         ...
 
     def invoke(self, context, event):
         wm = context.window_manager
-        return wm.invoke_props_dialog(self)
-    
+        # wm.invoke_props_dialog(self)
+        wm.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
     def draw(self, context):
         layout = self.layout
         

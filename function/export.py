@@ -5,8 +5,8 @@ from pathlib import Path
 class FileExport:
     @staticmethod
     def ExportFBX(self: Operator, folder_path: str, file_name: str, batch_mode: str | None = "OFF"):
-        
-        Path(folder_path).mkdir(parents = True, exist_ok =True)
+
+        Path(folder_path).mkdir(parents=True, exist_ok=True)
 
         target_file_path = f'{folder_path}\\{file_name}'
 
