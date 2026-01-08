@@ -28,10 +28,10 @@ class F_OT_ObjMoveToCollectionByName(Operator):
         # 1.traversal
         for obj in objects:
             # 2.get prefix
-            name_tmp = re.search(r'(?P<prefix>[A-Za-z_]+)(?P<suffix>_[\w+])', obj.name)
-            # error handel
+            name_tmp = re.search(r'(?P<prefix>[A-Za-z_]+)(?P<suffix>[-.\w]*)', obj.name)
+            # handle error
             if name_tmp == None:
-                self.Error(f"{obj.name} does not have prefix")
+                self.Warning(f"{obj.name} does not have prefix")
                 continue
             prefix = name_tmp.group('prefix')
             # 3.if collection not exist
